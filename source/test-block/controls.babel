@@ -1,0 +1,227 @@
+/** @jsx wp.element.createElement */
+
+import { PannelUltimateBgControl } from '../common/PannelUltimateBgControl.js';
+
+export function Controls(args) {
+
+  /* definitions */
+
+  const props = args.propsObject;
+
+  const { __ } = wp.i18n;
+  const { MediaUpload, MediaUploadCheck, MediaPlaceholder, MediaReplaceFlow } = wp.blockEditor;
+  const { BlockVerticalAlignmentToolbar, BlockControls, InspectorControls, AlignmentToolbar } = wp.blockEditor;
+  const { Button, ToolbarGroup, Toolbar, ToolbarButton, Dashicon, SVG, Path, PanelBody, PanelRow, SelectControl } = wp.components;
+  const { useState, useEffect, Fragment } = wp.element;
+  const wped = wp.blockEditor;
+  const wpcom = wp.components;
+
+
+  const allClassesNames = [
+    { name: __('~ <576px', 'megastrap'), slug: 'col' },
+    { name: __('SM ≥576px','megastrap'), slug: 'col-sm' },
+    { name: __('MD ≥768px','megastrap'), slug: 'col-md' },
+    { name: __('LG ≥992px','megastrap'), slug: 'col-lg' },
+    { name: __('XL ≥1200px','megastrap'), slug: 'col-xl' },
+    { name: __('XXL ≥1400px','megastrap'), slug: 'col-xxl' }
+  ];
+
+
+  /* output */
+
+  return (
+
+    <Fragment>
+
+      <BlockControls>
+        <BlockVerticalAlignmentToolbar
+          onChange={ ( newcontent ) => { props.setAttributes( { valign: newcontent } ); } }
+          value={ props.attributes.valign }
+        />
+      </BlockControls>
+
+      <InspectorControls>
+
+        <wpcom.PanelBody title={__('Grid')} >
+
+          {/*
+          <wpcom.__experimentalBoxControl
+            value={
+              {
+                top: '50px',
+                left: '10%',
+                right: '10%',
+                bottom: '50px',
+              }
+            }
+            onChange={ (newVal) => { console.log(newVal); } }
+          />
+          */}
+
+          <ColumnControl props={ props } />
+
+        </wpcom.PanelBody>
+
+
+        <wpcom.PanelBody title={__('Padding')} >
+
+        <wp.element.Fragment>
+          <wp.components.SelectControl
+            label="Size"
+            value={ 0 }
+            options={ [
+                { label: '1', value: 1 },
+                { label: '2', value: 2 },
+                { label: '3', value: 3 },
+            ] }
+            onChange={ (newVal) => { console.log(newVal); } }
+          />
+          { true && (
+            <wp.components.Card style={ { marginBottom: '1.5rem' } }>
+              <wp.components.CardBody>
+                <wp.components.Flex>
+                  <wp.components.FlexItem>
+                    <wp.components.SelectControl
+                      label="↑"
+                      value={ 0 }
+                      options={ [
+                          { label: '1', value: 1 },
+                          { label: '2', value: 2 },
+                          { label: '3', value: 3 },
+                      ] }
+                      onChange={ (newVal) => { console.log(newVal); } }
+                    />
+                  </wp.components.FlexItem>
+                  <wp.components.FlexItem>
+                    <wp.components.SelectControl
+                      label="→"
+                      value={ 0 }
+                      options={ [
+                          { label: '1', value: 1 },
+                          { label: '2', value: 2 },
+                          { label: '3', value: 3 },
+                      ] }
+                      onChange={ (newVal) => { console.log(newVal); } }
+                    />
+                  </wp.components.FlexItem>
+                  <wp.components.FlexItem>
+                    <wp.components.SelectControl
+                      label="←"
+                      value={ 0 }
+                      options={ [
+                          { label: '1', value: 1 },
+                          { label: '2', value: 2 },
+                          { label: '3', value: 3 },
+                      ] }
+                      onChange={ (newVal) => { console.log(newVal); } }
+                    />
+                  </wp.components.FlexItem>
+                  <wp.components.FlexItem>
+                    <wp.components.SelectControl
+                      label="↓"
+                      value={ 0 }
+                      options={ [
+                          { label: '1', value: 1 },
+                          { label: '2', value: 2 },
+                          { label: '3', value: 3 },
+                      ] }
+                      onChange={ (newVal) => { console.log(newVal); } }
+                    />
+                  </wp.components.FlexItem>
+                </wp.components.Flex>
+              </wp.components.CardBody>
+            </wp.components.Card>
+          ) }
+        </wp.element.Fragment>
+
+      </wpcom.PanelBody>
+
+      </InspectorControls>
+
+    </Fragment>
+  );
+
+}
+
+
+function ColumnControl( args ) {
+  const props = args.props;
+  const { __ } = wp.i18n;
+  const allClassesNames = [
+    { name: __('Default', 'megastrap'), slug: 'col' },
+    { name: __('SM ≥576px','megastrap'), slug: 'col-sm' },
+    { name: __('MD ≥768px','megastrap'), slug: 'col-md' },
+    { name: __('LG ≥992px','megastrap'), slug: 'col-lg' },
+    { name: __('XL ≥1200px','megastrap'), slug: 'col-xl' },
+    { name: __('XXL ≥1400px','megastrap'), slug: 'col-xxl' }
+  ];
+  return (
+    <wp.element.Fragment>
+      { allClassesNames.map(x=>(
+        <wp.element.Fragment>
+          <wp.components.ToggleControl
+            label={ x.name }
+            checked={ getColValue(props, x.slug) }
+            onChange={ (newVal) => {
+              if (newVal) setColValue(props, x.slug, 6);
+              if (!newVal) setColValue(props, x.slug, 0);
+            } }
+          />
+          { getColValue(props, x.slug) && (
+            <wp.components.Card style={ { marginBottom: '1.5rem' } }>
+              <wp.components.CardBody>
+                <wp.components.RangeControl
+                  label={ __('Width') }
+                  value={ getColValue(props, x.slug) }
+                  onChange={ (newVal) => { setColValue(props, x.slug ,newVal); } }
+                  min={ 1 }
+                  max={ 12 }
+                />
+              </wp.components.CardBody>
+            </wp.components.Card>
+          ) }
+        </wp.element.Fragment>
+      )) }
+    </wp.element.Fragment>
+  );
+}
+
+
+function setColValue( props, bsClass='col', value=0, bsClasses='bsClasses' ) {
+  let allClasses = props.attributes[bsClasses].trim().split(" ");
+  let colMatr = [0,0,0,0,0,0];
+  allClasses.forEach( (val,i) => {
+    if (val.includes('col-') && val.length>=4 && val.length<=7) colMatr[0] = parseInt(val.replace(/\D/g, ''));
+    if (val.includes('col-sm')) colMatr[1] = parseInt(val.replace(/\D/g, ''));
+    if (val.includes('col-md')) colMatr[2] = parseInt(val.replace(/\D/g, ''));
+    if (val.includes('col-lg')) colMatr[3] = parseInt(val.replace(/\D/g, ''));
+    if (val.includes('col-xl')) colMatr[4] = parseInt(val.replace(/\D/g, ''));
+    if (val.includes('col-xxl')) colMatr[5] = parseInt(val.replace(/\D/g, ''));
+  } );
+  if (bsClass=='col') colMatr[0] = value;
+  if (bsClass=='col-sm') colMatr[1] = value;
+  if (bsClass=='col-md') colMatr[2] = value;
+  if (bsClass=='col-lg') colMatr[3] = value;
+  if (bsClass=='col-xl') colMatr[4] = value;
+  if (bsClass=='col-xxl') colMatr[5] = value;
+  let extClass =
+    ((colMatr[0]!=0)?' col-'+colMatr[0]:'')+
+    ((colMatr[1]!=0)?' col-sm-'+colMatr[1]:'')+
+    ((colMatr[2]!=0)?' col-md-'+colMatr[2]:'')+
+    ((colMatr[3]!=0)?' col-lg-'+colMatr[3]:'')+
+    ((colMatr[4]!=0)?' col-xl-'+colMatr[4]:'')+
+    ((colMatr[5]!=0)?' col-xxl-'+colMatr[5]:'');
+  if (extClass=="") extClass = 'col';
+  props.setAttributes( {[bsClasses]:extClass} );
+}
+
+
+function getColValue( props, bsClass='col', bsClasses='bsClasses' ) {
+  let classValue = null;
+  let allClasses = props.attributes[bsClasses].trim().split(" ");
+  allClasses.forEach( (val,i) => {
+    if (val.includes(bsClass) && bsClass!='col') classValue = parseInt(val.replace(/\D/g, ''));
+    if (val.includes(bsClass)  && val.length>=4 && val.length<=7) classValue = parseInt(val.replace(/\D/g, ''));
+  } );
+  return classValue;
+}

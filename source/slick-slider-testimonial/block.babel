@@ -1,0 +1,276 @@
+/** @jsx wp.element.createElement */
+
+const { __ } = wp.i18n;
+const { registerBlockType } = wp.blocks;
+const { InnerBlocks } = wp.blockEditor;
+const { serverSideRender } = wp;
+const { BlockVerticalAlignmentToolbar, BlockControls, InspectorControls, AlignmentToolbar } = wp.blockEditor;
+const { Button, ToolbarGroup, Toolbar, ToolbarButton, Dashicon, SVG, Path, PanelBody, PanelRow, SelectControl, Placeholder } = wp.components;
+const { useState, useEffect, Fragment } = wp.element;
+const { useSelect } = wp.data;
+
+import { bootstrapValignClasses } from '../common/common-functions.js';
+import { PannelUltimateBgControl } from '../common/PannelUltimateBgControl.js';
+import { ControlsSetParent } from './controls-parent.js';
+import { ControlsSetChild } from './controls-child.js';
+
+const BlockIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M7 6H1V12H7V6Z" fill="white" stroke="#3498DB" stroke-width="2"/>
+  <path d="M20 5H9V7H20V5Z" fill="#C4C4C4"/>
+  <path d="M20 11H9V13H20V11Z" fill="#C4C4C4"/>
+  <path d="M20 8H9V10H20V8Z" fill="#C4C4C4"/>
+  <path d="M14 16L11 17.7321V14.2679L14 16Z" fill="#1E1E1E"/>
+  <path d="M6 16L9 14.2679V17.7321L6 16Z" fill="#1E1E1E"/>
+  </svg>
+)
+const ChildBlockIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M19 3H1V17H19V3Z" fill="white" stroke="#3498DB" stroke-width="2"/>
+    <path d="M13 12H7V14H13V12Z" fill="#C4C4C4"/>
+    <path d="M14 6H6V8H14V6Z" fill="#C4C4C4"/>
+    <path d="M16 9H4V11H16V9Z" fill="#C4C4C4"/>
+  </svg>
+)
+
+
+/*============================================================================*/
+/*                              PARENTBLOCK BEGIN                             */
+/*============================================================================*/
+
+const withCustomClassName = wp.compose.createHigherOrderComponent( ( BlockListBlock ) => {
+  return ( props ) => {
+  if ( props.name !== 'k-blocks-slick-testimonial-child/k-blocks' ) {
+    return <BlockListBlock { ...props } />
+  }
+  return (
+    <div class="k-blocks-slick-testimonial-slide-content d-block">
+      <BlockListBlock { ...props } className={ "d-block" } />
+    </div>
+  ); };
+}, 'withClientIdClassName' );
+wp.hooks.addFilter( 'editor.BlockListBlock', 'example/filter-blocks', withCustomClassName );
+
+
+registerBlockType( 'k-blocks-slick-testimonial-parent/k-blocks', {
+	title: __( 'Testimonial Slick Slider' ),
+	icon: BlockIcon,
+	category: 'k-common-blocks',
+	//parent: [ 'core/post-content' ], // only root block
+	supports: { anchor: true, html : false},
+	attributes: {
+    className: { type: 'string' },
+    anchor: { type: 'string' },
+    blockID: { type: 'string', default: '' },
+    minHeight: { type: 'integer', default: 7 },
+    maxWidth: { type: 'integer', default: 40 },
+    arrows: { type: 'boolean', default: true },
+    dots: { type: 'boolean', default: false },
+    infinite: { type: 'boolean', default: false },
+    autoplay: { type: 'boolean', default: false },
+    fade: { type: 'boolean', default: false },
+    pauseOnHover: { type: 'boolean', default: false },
+    arrowsColorClass: { type: 'string', default: '' },
+    arrowsSizeClass: { type: 'string', default: '' },
+    arrowsPositionClass: { type: 'string', default: '' },
+    dotsColorClass: { type: 'string', default: '' },
+    dotsSizeClass: { type: 'string', default: '' },
+    dotsPositionClass: { type: 'string', default: '' },
+    childPadding: { type: 'string', default: 'p-3' },
+	},
+
+
+/*=============================================================================*/
+/*                                    EDIT                                     */
+/*=============================================================================*/
+
+	edit(props) {
+
+    const att = props.attributes;
+    const [editMode, setEditMode] = useState(false);
+    const innerBlockCount = useSelect( ( select ) => select( 'core/block-editor' ).getBlocks( props.clientId ).length,  [ props.clientId ] );
+    if ( props.attributes.blockID != props.clientId ) props.setAttributes( { blockID: props.clientId } );
+    props.editMode = editMode;
+    props.toggleEditMode = function() { setEditMode(!editMode); };
+    props.setEditMode = (par) => { setEditMode(par); };
+
+    var allInnerBlocks = wp.data.select( 'core/block-editor' ).getBlocks( props.clientId );
+    var sliderHtml = "";
+    allInnerBlocks.forEach( el =>  sliderHtml += wp.blocks.getBlockContent( el ) );
+
+		return (
+      <Fragment>
+
+        {/* BLOCK CONTROLS IMPORT */}
+
+        <ControlsSetParent propsObject={props} />
+
+        {/* EDIT RENDER
+        ========================================================================*/}
+
+        <div
+          className={
+            "k-blocks-slick-testimonial-parent backend"+ ( att.className ? " "+att.className : "")+
+            (editMode ? " editmode" : " viewmode" )+controlClasses(props)
+          }
+          style= { { maxWidth: att.maxWidth+'rem', marginLeft: 'auto', marginRight: 'auto', } }
+        >
+
+          { !innerBlockCount && (
+            <Placeholder
+              icon={ BlockIcon }
+              className={ editMode ? "mb-3" : "" }
+              label="Add new slide"
+              style={ { minHeight: att.minHeight+'Rem', } }
+            />
+          ) }
+
+
+          { editMode && (
+            <InnerBlocks
+              allowedBlocks={[ 'k-blocks-slick-testimonial-child/k-blocks' ]}
+              orientation="vertiсal"
+              renderAppender={ editMode ? () => <InnerBlocks.ButtonBlockAppender /> : false }
+            />
+          ) }
+
+
+
+          { !editMode && (
+            <div
+              className={ "hero-gallery "+controlClasses(props) }
+              id={ "testimonial-gallery-"+att.blockID }
+              dangerouslySetInnerHTML={{ __html: sliderHtml}}
+            />
+          ) }
+
+        </div>
+
+
+
+      </Fragment>
+		);
+	},
+
+
+  /*===========================================================================*/
+  /*                                   SAVE                                    */
+  /*===========================================================================*/
+
+	save(props) {
+
+    const att = props.attributes;
+    const frontEndScript = `
+    jQuery(document).ready(function($) {
+      $("#testimonial-gallery-`+att.blockID+`").slick({
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        arrows: `+props.attributes.arrows+`,
+        dots: `+props.attributes.dots+`,
+        infinite: `+props.attributes.infinite+`,
+        autoplay: `+props.attributes.autoplay+`,
+        fade: `+props.attributes.fade+`,
+        pauseOnHover: `+props.attributes.pauseOnHover+`,
+        adaptiveHeight: true,
+      });
+    });`;
+
+    return (
+        <div
+          className={ "k-blocks-slick-testimonial-parent testimonial-gallery "+controlClasses(props) }
+          style= { { maxWidth: att.maxWidth+'rem', marginLeft: 'auto', marginRight: 'auto', } }
+        >
+          <div id={ "testimonial-gallery-"+att.blockID }>
+            <InnerBlocks.Content />
+          </div>
+          <script dangerouslySetInnerHTML={{ __html: frontEndScript}} />
+        </div>
+        ); },
+
+    } );
+
+
+
+    /*============================================================================*/
+    /*                             CHILD BLOCK BEGIN                              */
+    /*============================================================================*/
+
+    registerBlockType( 'k-blocks-slick-testimonial-child/k-blocks', {
+      title: __( 'Slide' ),
+    	icon: ChildBlockIcon,
+    	category: 'k-common-blocks',
+    	parent: [ 'k-blocks-slick-testimonial-parent' ],
+    	supports: { html: false, className: false },
+    	attributes: {
+        className: { type: 'string', },
+        minHeight: { type: 'integer', default: 10 },
+        color: { type: 'string', default: 'inherit', },
+        bgColor: { type: 'string', default: 'transparent', },
+        childPadding: { type: 'string', default: 'p-3' },
+    	},
+
+/*=============================================================================*/
+/*                                    EDIT                                     */
+/*=============================================================================*/
+
+	edit(props) {
+
+    const atts = props.attributes;
+    const parent = useSelect( ( select ) => select('core/block-editor').getBlockParents(props.clientId) );
+    const parentAttributes = useSelect( ( select ) => select('core/block-editor').getBlockAttributes(parent) );
+    props.setAttributes( { minHeight : parentAttributes.minHeight, } );
+    props.setAttributes( { childPadding : parentAttributes.childPadding, } );
+
+		return (
+      <Fragment>
+
+        {/* BLOCK CONTROLS IMPORT */}
+
+        <ControlsSetChild propsObject={props} />
+
+        <div
+          className={ "k-blocks-slick-testimonial-slide d-flex flex-column justify-content-center "+atts.childPadding }
+          style={ { color: atts.color, backgroundColor: atts.bgColor, minHeight: atts.minHeight+'Rem', } }
+        >
+          <InnerBlocks
+            templateLock={false}
+            //renderAppender={ () => <InnerBlocks.ButtonBlockAppender /> }
+          />
+        </div>
+
+      </Fragment>
+		);
+	},
+
+  /*===========================================================================*/
+  /*                                   SAVE                                    */
+  /*===========================================================================*/
+
+	save(props) {
+
+    const atts = props.attributes;
+
+    return (
+      <Fragment>
+        <div
+          className={ "k-blocks-slick-testimonial-slide d-flex flex-column justify-content-center "+atts.childPadding }
+          style={ { color: atts.color, backgroundColor: atts.bgColor, minHeight: atts.minHeight+'Rem', } }
+        >
+          <div className="k-blocks-slick-testimonial-inner-content d-block">
+            <InnerBlocks.Content />
+          </div>
+        </div>
+      </Fragment>
+		);
+
+	},
+} );
+
+
+function controlClasses(props) {
+  const att = props.attributes;
+  const allClasses = [
+    att.arrowsColorClass, att.arrowsSizeClass, att.arrowsPositionClass, att.dotsColorClass, att.dotsSizeClass, att.dotsPositionClass
+  ];
+  return allClasses.filter(e => e !== '').join(' ');
+}

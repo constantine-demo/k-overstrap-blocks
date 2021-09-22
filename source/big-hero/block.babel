@@ -1,0 +1,192 @@
+/** @jsx wp.element.createElement */
+
+const { __ } = wp.i18n;
+const { registerBlockType } = wp.blocks;
+const { MediaUpload, InnerBlocks, MediaPlaceholder, MediaReplaceFlow } = wp.blockEditor;
+const { BlockVerticalAlignmentToolbar, BlockControls, InspectorControls, AlignmentToolbar } = wp.blockEditor;
+const { RichText, Button, ToolbarGroup, ExternalLink, Toolbar, ToolbarButton, Panel, PanelBody, PanelRow, RangeControl } = wp.components;
+const { useState, useEffect, Fragment } = wp.element;
+const HeroBlockIcon = () => (
+	<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+		<rect x="0.5" y="4.5" width="19" height="11" fill="#C4C4C4" stroke="#6000FF"/>
+		<rect x="10" y="2" width="8" height="16" fill="#6000FF"/>
+	</svg>
+);
+
+
+
+/*===================================================*/
+/*              Wide Image Text Block                */
+/*===================================================*/
+
+registerBlockType( 'k-blocks-big-hero/k-blocks', {
+	title: __( 'Big hero block' ),
+	icon: HeroBlockIcon,
+	category: 'k-common-blocks',
+	parent: [ 'core/post-content' ], // only root block
+	supports: {
+		align: [ 'full' ],
+	},
+	attributes: {
+		align: {
+			type: 'string',
+			default: 'full',
+		},
+		reverse: {
+			type: 'boolean',
+			default: false,
+		},
+		image: {
+			type: 'string',
+			default: '',
+		},
+		valign: {
+			type: 'string',
+			default: 'top',
+		},
+		height: {
+			type: 'integer',
+			default: 25,
+		},
+		className: {
+			type: 'string',
+		},
+	},
+
+	edit(props) {
+
+
+		/* valign classes change */
+		function bootstrapValignClasses( valign ) {
+			switch( valign ) {
+				case 'top': return 'd-flex flex-column justify-content-start';
+				case 'center': return 'd-flex flex-column justify-content-center';
+				case 'bottom': return 'd-flex flex-column justify-content-end';
+			}
+			return '';
+		}
+
+		return (
+			<div
+				className={ "k-big-hero-block"+" "+props.attributes.className }
+				style={ {
+					backgroundImage: "url('"+props.attributes.image+"')" ,
+					backgroundposition: "center",
+					backgroundSize: "cover"
+				} }
+			>
+
+				<BlockControls>
+					
+					<ToolbarButton
+						icon={ "align-pull-left" }
+						label={ __( "Show media on right" ) }
+						onClick = { () => { props.setAttributes( { reverse: false } ) } }
+						isActive = { !props.attributes.reverse }
+					/>
+					<ToolbarButton
+						icon={ "align-pull-right" }
+						label={ __( "Show media on left" ) }
+						onClick = { () => { props.setAttributes( { reverse: true } ) } }
+						isActive = { props.attributes.reverse }
+					/>
+					<BlockVerticalAlignmentToolbar
+						onChange={ ( newcontent ) => { props.setAttributes( { valign: newcontent } ); } }
+						value={ props.attributes.valign }
+					/>
+					<MediaReplaceFlow
+						mediaURL={ props.attributes.image }
+						allowedTypes={ [ 'image' ] }
+						accept="image/*"
+						name={ __( "Background" ) }
+						onSelect={ ( newcontent ) => {props.setAttributes( { image: newcontent.url } ); } }
+					/>
+
+				</BlockControls>
+
+			<Fragment>
+				<InspectorControls>
+					<PanelBody>
+						<RangeControl
+							label={ __("Height of the hero block (rem)") }
+							onChange={ (newvalue) => { props.setAttributes( { height: newvalue } ); } }
+							value={ props.attributes.height }
+							renderTooltipContent={ value => `${value}%` }
+							min={ 30 }
+							max={ 60 }
+							step={ 1 }
+						/>
+					</PanelBody>
+				</InspectorControls>
+			</Fragment>
+
+				<div class="k-big-hero-block-container k-editor-container m-auto">
+					<div
+						className={ 'k-big-hero-block-row row px-lg-0' + ( props.attributes.reverse ? ' flex-row-reverse' : '' ) }
+						style={ { minHeight: props.attributes.height+"rem" } }
+					>
+
+						<div className={'k-big-hero-block-col-empty d-none d-lg-block col-lg-6 px-lg-0'}>
+						</div>
+
+						<div className={'k-big-hero-block-col-content col-lg-6 px-lg-0 '+bootstrapValignClasses(props.attributes.valign) }>
+							<div className="k-big-hero-block-inner-content px-lg-3 py-4">
+								<InnerBlocks  />
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+		</div>
+
+		);
+	},
+
+
+	save(props) {
+
+
+		/* valign classes change */
+		function bootstrapValignClasses( valign ) {
+			switch( valign ) {
+				case 'top': return 'd-flex flex-column justify-content-start';
+				case 'center': return 'd-flex flex-column justify-content-center';
+				case 'bottom': return 'd-flex flex-column justify-content-end';
+			}
+			return '';
+		}
+
+		return (
+
+			<div
+				className="k-big-hero-block"
+				style={ {
+					backgroundImage: "url('"+props.attributes.image+"')" ,
+					backgroundposition: "center",
+					backgroundSize: "cover"
+				} }
+			>
+				<div class="k-big-hero-block-container container">
+					<div
+						className={ 'k-big-hero-block-row row px-lg-0' + ( props.attributes.reverse ? ' flex-row-reverse' : '' ) }
+						style={ { minHeight: props.attributes.height+"rem" } }
+					>
+
+						<div className={'k-big-hero-block-col-empty d-none d-lg-block col-lg-6 px-lg-0'}>
+						</div>
+
+						<div className={'k-big-hero-block-col-content col-lg-6 px-lg-0 '+bootstrapValignClasses(props.attributes.valign) }>
+							<div className="k-big-hero-block-inner-content px-lg-3 py-4">
+								<InnerBlocks.Content  />
+							</div>
+						</div>
+
+					</div>
+				</div>
+      </div>
+
+		);
+
+	},
+} );

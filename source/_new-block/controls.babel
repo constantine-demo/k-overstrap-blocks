@@ -1,0 +1,36 @@
+/** @jsx wp.element.createElement */
+
+import { PannelUltimateBgControl } from '../common/PannelUltimateBgControl.js';
+
+export function Controls(args) {
+
+  /* definitions */
+
+  const props = args.propsObject;
+
+  const { __ } = wp.i18n;
+  const { MediaUpload, MediaUploadCheck, MediaPlaceholder, MediaReplaceFlow } = wp.blockEditor;
+  const { BlockVerticalAlignmentToolbar, BlockControls, InspectorControls, AlignmentToolbar } = wp.blockEditor;
+  const { Button, ToolbarGroup, Toolbar, ToolbarButton, Dashicon, SVG, Path, PanelBody, PanelRow, SelectControl } = wp.components;
+  const { useState, useEffect, Fragment } = wp.element;
+
+  /* output */
+
+  return (
+
+    <Fragment>
+
+      <BlockControls>
+        <BlockVerticalAlignmentToolbar
+          onChange={ ( newcontent ) => { props.setAttributes( { valign: newcontent } ); } }
+          value={ props.attributes.valign }
+        />
+      </BlockControls>
+
+      <InspectorControls>
+      </InspectorControls>
+
+    </Fragment>
+  );
+
+}

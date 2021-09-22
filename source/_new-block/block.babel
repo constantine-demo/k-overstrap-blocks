@@ -1,0 +1,77 @@
+/** @jsx wp.element.createElement */
+
+const { __ } = wp.i18n;
+const { registerBlockType } = wp.blocks;
+const { InnerBlocks } = wp.blockEditor;
+const { BlockControls, InspectorControls } = wp.blockEditor;
+const { useState, Fragment } = wp.element;
+
+import { bootstrapValignClasses } from '../common/common-functions.js';
+import { PannelUltimateBgControl } from '../common/PannelUltimateBgControl.js';
+import { Controls } from './controls.js';
+
+
+const SectionBlockIcon = () => (
+  <svg width="20" height="24" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M18 3H2C1.44772 3 1 3.44772 1 4V20C1 20.5523 1.44772 21 2 21H18C18.5523 21 19 20.5523 19 20V4C19 3.44772 18.5523 3 18 3Z" fill="#c10000"/>
+  </svg>
+)
+
+
+/*============================================================================*/
+/*                        bootstrap Section Block begin                       */
+/*============================================================================*/
+
+registerBlockType( 'k-blocks-new-block/k-blocks', {
+	title: __( 'MY NEW BLOCK' ),
+	icon: SectionBlockIcon,
+	category: 'k-common-blocks',
+	//parent: [ 'core/post-content' ], // only root block
+	supports: { align: [ 'full' ], anchor: true, html : false},
+	attributes: {
+		align: {type: 'string', default: 'full', },
+		valign: { type: 'string', default: 'center', },
+    className: { type: 'string', },
+    anchor: { type: 'string', },
+	},
+
+
+/*=============================================================================*/
+/*                                    EDIT                                     */
+/*=============================================================================*/
+
+	edit(props) {
+
+		return (
+      <Fragment>
+
+        {/* BLOCK CONTROLS IMPORT */}
+        <Controls propsObject={props} />
+
+        {/* EDIT RENDER
+        ========================================================================*/}
+
+        <div>
+          <h1>TEST CONTENT</h1>
+        </div>
+
+    </Fragment>
+		);
+	},
+
+
+  /*===========================================================================*/
+  /*                                   SAVE                                    */
+  /*===========================================================================*/
+
+	save(props) {
+        return (
+
+          <div>
+            <h1>TEST content</h1>
+          </div>
+
+		);
+
+	},
+} );

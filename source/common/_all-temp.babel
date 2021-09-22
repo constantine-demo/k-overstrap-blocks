@@ -1,0 +1,204 @@
+/** @jsx wp.element.createElement */
+
+
+/*===================================================*/
+/*              BLOCK CONTROL FUNCTIONS              */
+/*===================================================*/
+
+
+/* LINK TOOLBAR
+-----------------------------------------------------*/
+
+/* usage all arguments required
+
+// required attributes for toolbar: LinkToolbar
+url: { type: 'string', default: '#', },
+opensInNewTab: { type: 'boolean', default: false, },
+
+//Link toolber for BlockControls use it as a pattern
+<LinkToolbar
+	value={ { url: props.attributes.url, opensInNewTab: props.attributes.opensInNewTab } }
+	onChange={ ( nextValue ) => {
+		if ( nextValue.url != undefined ) props.setAttributes( { url : nextValue.url} );
+		if ( nextValue.opensInNewTab != undefined ) props.setAttributes( { opensInNewTab: nextValue.opensInNewTab} );
+	} }
+/>
+
+*/
+export function LinkToolbar(args) {
+	const { __ } = wp.i18n;
+	const { Toolbar, ToolbarButton, Popover } = wp.components;
+	const {__experimentalLinkControl, URLPicker } = wp.blockEditor;
+	const LinkControl = __experimentalLinkControl;
+	const { useState } = wp.element;
+	const [isPoupoverOpen, setPoupoverOpen] = useState( false );
+	const ImgLink = () => (
+		<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false">
+			<path d="M15.6 7.2H14v1.5h1.6c2 0 3.7 1.7 3.7 3.7s-1.7 3.7-3.7 3.7H14v1.5h1.6c2.8 0 5.2-2.3 5.2-5.2 0-2.9-2.3-5.2-5.2-5.2zM4.7 12.4c0-2 1.7-3.7 3.7-3.7H10V7.2H8.4c-2.9 0-5.2 2.3-5.2 5.2 0 2.9 2.3 5.2 5.2 5.2H10v-1.5H8.4c-2 0-3.7-1.7-3.7-3.7zm4.6.9h5.3v-1.5H9.3v1.5z"></path>
+		</svg>
+	);
+	return (
+		<Toolbar label="URL">
+			<ToolbarButton
+				icon={ ImgLink } // dashicons analog is "admin-links"
+				label={ __( "Link" ) }
+				onClick={ ()=> { setPoupoverOpen(true); } }
+			/>
+			{ isPoupoverOpen && (
+				<Popover  onClose={ ()=> { setPoupoverOpen(false); } } >
+					<__experimentalLinkControl
+						className="wp-block-navigation-link__inline-link-input"
+						value={ args.value }
+						onChange={ args.onChange }
+					/>
+				</Popover>
+			) }
+		</Toolbar>
+	)
+}
+
+/* BG CONTROL PANNEL
+-----------------------------------------------------*/
+
+/* USAGE
+
+// attributes fot PannelUltimateBgControl
+color: { type: 'string', default: 'inherit', },
+bgColor: { type: 'string', default: 'transparent', },
+bgGradient: { type: 'string', default: 'none', },
+bgImage: { type: 'string', default: 'none', },
+bgImageId: { type: 'integer', default: 0 },
+bgImageType: { type: 'string', default: 'cover', },
+
+// Link inspectorControls all toolbars are optional remoove values to disable them
+<PannelUltimateBgControl
+	// first toolbar: color block
+	colorValue={ props.attributes.color }
+	onColorChange={ ( newVal ) => props.setAttributes({ color: newVal }) }
+	bgColorValue={ props.attributes.bgColor }
+	onBgColorChange={ ( newVal ) => props.setAttributes({ bgColor: newVal }) }
+	// second toolbar: image block
+	bgImgUrlValue={ props.attributes.bgImage }
+	bgImgIdValue={ props.attributes.bgImageId }
+	onBgImgSelect={ ( newVal ) => props.setAttributes({ bgImage: "url('"+newVal.url+"')", bgImageId: newVal.id }) }
+	onSetDefaultClick={ () => props.setAttributes({ bgImage: "none", bgImageId: 0 }) }
+	// bg style for second toolbar: optional
+	bgStyleValue={ props.attributes.bgImageType }
+	onBgStyleChange={ ( newVal ) => props.setAttributes({ bgImageType: newVal }) }
+	// third toolbar: gradient overlay block
+	gradientOvelayValue={ props.attributes.bgGradient }
+	onGradientOverlayChange={ ( newVal ) => props.setAttributes({ bgGradient: newVal }) }
+/>
+*/
+export function PannelUltimateBgControl(args) {
+	const { __ } = wp.i18n;
+	const { MediaUpload, MediaUploadCheck, MediaPlaceholder, __experimentalPanelColorGradientSettings } = wp.blockEditor;
+	const { Button, Dashicon, SVG, Path, PanelBody, PanelRow, SelectControl } = wp.components;
+	const { Fragment } = wp.element;
+	if ( args.colorValue==undefined ) { args.colorValue = 'inherit' }
+	if ( args.bgColorValue==undefined ) { args.bgColorValue = 'transparent' }
+	if ( args.bgImgUrlValue==undefined ) { args.bgImgUrlValue = 'none' }
+	if ( args.bgImgIdValue==undefined ) { args.bgImgIdValue = 0 }
+	if ( args.bgStyleValue==undefined ) { args.bgStyleValue = 'cover' }
+	if ( args.gradientOvelayValue==undefined ) { args.gradientOvelayValue = 'none' }
+	var colorSettings = [];
+	if ( args.onColorChange!=undefined ) colorSettings.push({ label: __( 'Text Color' ), colorValue: args.colorValue, onColorChange: args.onColorChange, });
+	if ( args.onBgColorChange!=undefined ) colorSettings.push({ label: __( 'Background Color' ), colorValue: args.bgColorValue, onColorChange: args.onBgColorChange, });
+	return (
+	<Fragment>
+		{ ( args.onColorChange!=undefined || args.onBgColorChange!=undefined ) &&
+			<__experimentalPanelColorGradientSettings
+				title={ __( 'Colors' ) }
+				settings={ colorSettings }
+			/>
+		}
+		{ ( args.onBgImgSelect!=undefined && args.onSetDefaultClick!=undefined ) &&
+			<PanelBody title={__('Select background image')} >
+				<div className="editor-post-featured-image" style={{ marginBottom: "24px" }}>
+					<MediaUploadCheck>
+						<MediaUpload
+							onSelect={ args.onBgImgSelect }
+							value={ args.bgImgIdValue }
+							allowedTypes={ ['image'] }
+							render={({open}) => (
+								<Button
+									className={ args.bgImgUrlValue == "none"  ? 'editor-post-featured-image__toggle' : 'editor-post-featured-image__preview'}
+									onClick={open}
+								>
+									{args.bgImgUrlValue == "none" && __('Choose an image')}
+									{args.bgImgUrlValue != "none" &&
+										<div
+											style={ {
+												backgroundImage: args.bgImgUrlValue,
+												backgroundSize: "contain", backgroundRepeat: "no-repeat", backgroundPosition: "center",
+												height: "150px", backgroundColor: "#f0f0f0",
+											} }
+										>
+										</div>
+									}
+								</Button>
+							)}
+						/>
+					</MediaUploadCheck>
+					{args.bgImgUrlValue != "none" &&
+						<MediaUploadCheck>
+							<MediaUpload
+								title={ __('Replace image') }
+								value={ args.bgImgIdValue }
+								onSelect={ args.onBgImgSelect }
+								allowedTypes={[ 'image' ]}
+								render={({open}) => (
+									<Button onClick={open} isDefault isLarge>{__('Replace image')}</Button>
+								)}
+							/>
+						</MediaUploadCheck>
+					}
+					{args.bgImgUrlValue != "none" &&
+						<MediaUploadCheck>
+							<Button onClick={ args.onSetDefaultClick } isLink isDestructive >{__('Remove image')}</Button>
+						</MediaUploadCheck>
+					}
+				</div>
+				{ ( args.bgImgUrlValue != "none" ) && ( args.onBgStyleChange!=undefined ) &&
+					<SelectControl
+						label={ __( 'Background type' ) }
+						value={ args.bgStyleValue }
+						onChange={ args.onBgStyleChange }
+						options={ [
+							{ value: 'cover', label: __( 'Cover' ) },
+							{ value: 'repeat', label: __( 'Repeat' ) },
+						] }
+					/>
+				}
+			</PanelBody>
+		}
+		{ ( args.onGradientOverlayChange!=undefined ) &&
+			<__experimentalPanelColorGradientSettings
+				title={ __( 'Overlay' ) }
+				settings={ [
+					{
+						label: __( 'Background Overlay' ),
+						gradientValue: args.gradientOvelayValue,
+						onGradientChange: args.onGradientOverlayChange,
+					},
+				] }
+			/>
+		}
+	</Fragment>
+	);
+}
+
+
+/*===================================================*/
+/*                 HELPER FUNCTIONS                  */
+/*===================================================*/
+
+/* valign classes change */
+export function bootstrapValignClasses( valign ) {
+	switch( valign ) {
+		case 'top': return 'd-flex flex-column justify-content-start';
+		case 'center': return 'd-flex flex-column justify-content-center';
+		case 'bottom': return 'd-flex flex-column justify-content-end';
+	}
+	return '';
+}

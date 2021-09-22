@@ -1,0 +1,213 @@
+/** @jsx wp.element.createElement */
+
+const { __ } = wp.i18n;
+const { registerBlockType } = wp.blocks;
+const { InnerBlocks } = wp.blockEditor;
+const { BlockControls, InspectorControls, BlockEdit  } = wp.blockEditor;
+const { useState, Fragment, useEffect } = wp.element;
+const { useSelect } = wp.data;
+const { Button } = wp.components;
+
+import { bootstrapValignClasses } from '../common/common-functions.js';
+import { PannelUltimateBgControl } from '../common/PannelUltimateBgControl.js';
+import { Controls } from './controls.js';
+import { ControlsChild } from './controls-child.js';
+import { StartBlockPlaceholder } from './start-block-placeholder.js';
+
+
+const RowBlockIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M19 3H1V17H19V3Z" fill="#C4C4C4" stroke="#6000FF" stroke-width="2"/>
+    <path d="M13 4H7V16H13V4Z" fill="#6000FF"/>
+  </svg>
+)
+const ColBlockIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M19 2H1V18H19V2Z" fill="#C4C4C4"/>
+    <path d="M13 3H7V17H13V3Z" fill="white" stroke="#6000FF" stroke-width="2"/>
+  </svg>
+)
+
+function addBlockClass(props) {  return ( props.attributes.className ? " "+props.attributes.className : "" )  };
+function addCenterClass(props) {  return ( props.attributes.halign ? " justify-content-center" : "" )  };
+function addValignClass(props) {  return ( props.attributes.valign ? " "+props.attributes.valign : "" )  };
+
+
+/*============================================================================*/
+/*                              PARENTBLOCK BEGIN                             */
+/*============================================================================*/
+
+registerBlockType( 'k-blocks-bs-grid/k-blocks', {
+	title: __( 'Boostrap Grid' ),
+	icon: RowBlockIcon,
+	category: 'k-common-blocks',
+	//parent: [ 'core/post-content' ], // only root block
+	supports: { anchor: true, html : false},
+	attributes: {
+    className: { type: 'string', default: '' },
+    anchor: { type: 'string', default: '' },
+    halign: { type: 'boolean', default: false },
+    valign: { type: 'string', default: 'align-items-stretch' },
+    noGutters: { type: 'boolean', default: false },
+	},
+
+
+/*-----------------------------------------------------------------------------*/
+/*                                PARENT EDIT                                  */
+/*-----------------------------------------------------------------------------*/
+
+	edit(props) {
+
+    const innerBlockCount = useSelect( ( select ) => select( 'core/block-editor' ).getBlocks( props.clientId ).length,  [ props.clientId ] );
+
+		return (
+      <Fragment>
+
+        {/* BLOCK CONTROLS IMPORT */}
+        <Controls propsObject={props} />
+
+        {/* EDIT RENDER
+        ========================================================================*/}
+
+        <div className={
+          "k-bs-grid" + addBlockClass(props) + " grid-align-"+props.attributes.valign +
+          ( props.attributes.halign ? " has-centered-block-edit" : "" ) +
+          ( props.attributes.noGutters ? " k-bs-grid-no-gutters" : "" )
+        }>
+          <InnerBlocks
+            allowedBlocks={[ 'k-blocks-bs-grid-child/k-blocks' ]}
+            renderAppender={ false }
+            orientation="horizontal"
+          />
+          { !innerBlockCount && (
+            <StartBlockPlaceholder propsObject={props} />
+          ) }
+
+        </div>
+
+      </Fragment>
+		);
+	},
+
+
+/*-----------------------------------------------------------------------------*/
+/*                                PARENT SAVE                                  */
+/*-----------------------------------------------------------------------------*/
+
+  save(props) {
+
+    var addClass = (props.attributes.className) ? " "+props.attributes.className : "";
+    var guttersClass = (props.attributes.noGutters) ? " no-gutters" : "";
+
+    return (
+
+      <div className={ "k-bs-grid row" + addBlockClass(props) + addCenterClass(props) + addValignClass(props) + guttersClass }>
+
+        <InnerBlocks.Content />
+
+      </div>
+
+		);
+
+	},
+
+
+} );
+
+
+
+/*-----------------------------------------------------------------------------*/
+/*                              CHILD BLOCK BEGIN                              */
+/*-----------------------------------------------------------------------------*/
+
+/* common functions */
+function bsGetColClasses(props) {
+  let classes = "";
+  if ( props.attributes.colBreakpoint!=0 ) classes += " col-"+props.attributes.colBreakpoint;
+  if ( props.attributes.colSmBreakpoint!=0 ) classes += " col-sm-"+props.attributes.colSmBreakpoint;
+  if ( props.attributes.colMdBreakpoint!=0 ) classes += " col-md-"+props.attributes.colMdBreakpoint;
+  if ( props.attributes.colLgBreakpoint!=0 ) classes += " col-lg-"+props.attributes.colLgBreakpoint;
+  if ( props.attributes.colXlBreakpoint!=0 ) classes += " col-xl-"+props.attributes.colXlBreakpoint;
+  if ( classes == "" )  classes = " col";
+  return classes;
+}
+
+registerBlockType( 'k-blocks-bs-grid-child/k-blocks', {
+	title: __( 'Bootstrap Column' ),
+	icon: ColBlockIcon,
+	category: 'k-common-blocks',
+	parent: [ 'k-blocks-bs-grid-child' ],
+	supports: { html: false, className: false },
+	attributes: {
+    className: { type: 'string', default: '' },
+    colBreakpoint: { type: 'number', default: 0 },
+    colSmBreakpoint: { type: 'number', default: 0 },
+    colSmBreakpoint: { type: 'number', default: 0 },
+    colMdBreakpoint: { type: 'number', default: 6 },
+    colLgBreakpoint: { type: 'number', default: 0 },
+    colXlBreakpoint: { type: 'number', default: 0 },
+	},
+
+/*-----------------------------------------------------------------------------*/
+/*                                EDIT CHILD                                   */
+/*-----------------------------------------------------------------------------*/
+
+	edit(props) {
+
+    const hasInnerBlocks = useSelect(
+  		( select ) =>
+  			select( 'core/block-editor' ).getBlocks( props.clientId ).length > 0,
+  		[ props.clientId ]
+  	);
+
+		return (
+      <Fragment>
+
+        {/* BLOCK CONTROLS IMPORT */}
+        <ControlsChild propsObject={props} />
+
+        <InnerBlocks
+          renderAppender={
+            hasInnerBlocks
+              ? undefined
+              : () => <InnerBlocks.ButtonBlockAppender />
+          }
+        />
+
+      </Fragment>
+		);
+	},
+
+/*-----------------------------------------------------------------------------*/
+/*                                SAVE CHILD                                   */
+/*-----------------------------------------------------------------------------*/
+
+	save(props) {
+
+        return (
+          <Fragment>
+            <div className={ "k-bs-grid-col" + addBlockClass(props) + bsGetColClasses(props)  }>
+              <InnerBlocks.Content />
+            </div>
+          </Fragment>
+		);
+
+	},
+} );
+
+
+/*=============================================================================*/
+/*                ADD CLASS TO NESTED BLOCK WRAPPER WITH FILTER                */
+/*=============================================================================*/
+
+const withCustomClassName = wp.compose.createHigherOrderComponent( ( BlockListBlock ) => {
+  return ( props ) => {
+  if ( props.name !== 'k-blocks-bs-grid-child/k-blocks' ) {
+    return <BlockListBlock { ...props } />
+  }
+  return (
+    <BlockListBlock { ...props } className={ "mx-0 k-bs-grid-admin-col" + bsGetColClasses(props) + addBlockClass(props) } />);
+  };
+}, 'withClientIdClassName' );
+
+wp.hooks.addFilter( 'editor.BlockListBlock', 'example/filter-blocks', withCustomClassName );

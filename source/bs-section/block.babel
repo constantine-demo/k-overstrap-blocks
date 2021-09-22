@@ -1,0 +1,153 @@
+/** @jsx wp.element.createElement */
+
+const { __ } = wp.i18n;
+const { registerBlockType } = wp.blocks;
+const { InnerBlocks } = wp.blockEditor;
+const { ResizableBox } = wp.components;
+const { useSelect } = wp.data;
+const { BlockControls, InspectorControls } = wp.blockEditor;
+const { useState, Fragment } = wp.element;
+
+import { bootstrapValignClasses } from '../common/common-functions.js';
+import { PannelUltimateBgControl } from '../common/PannelUltimateBgControl.js';
+import { Controls } from './controls.js';
+
+
+const SectionBlockIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M18 2H2V18H18V2Z" fill="#C4C4C4" stroke="#6000FF" stroke-width="2"/>
+    <path d="M11 5H5V8H11V5Z" fill="#C4C4C4" stroke="#6000FF" stroke-width="2"/>
+    <path d="M15 12H9V15H15V12Z" fill="#C4C4C4" stroke="#6000FF" stroke-width="2"/>
+  </svg>
+)
+
+
+/*============================================================================*/
+/*                        bootstrap Section Block begin                       */
+/*============================================================================*/
+
+registerBlockType( 'k-blocks-bs-section/k-blocks', {
+	title: __( 'Section Bootstrap' ),
+	icon: SectionBlockIcon,
+	category: 'k-common-blocks',
+	parent: [ 'core/post-content' ], // only root block
+	supports: { align: [ 'full' ], anchor: true, html : false},
+	attributes: {
+		align: {type: 'string', default: 'full', },
+		valign: { type: 'string', default: 'center', },
+    color: { type: 'string', default: 'inherit', },
+    bgColor: { type: 'string', default: 'transparent', },
+    bgGradient: { type: 'string', default: false, },
+    bgImage: { type: 'string' },
+    bgImageId: { type: 'integer', default: 0 },
+    bgImageType: { type: 'string', default: 'cover', },
+    bgImageFocal: { type: 'object', default: { x: '0.5', y: '0.5' } },
+    className: { type: 'string', },
+    anchor: { type: 'string', },
+    isSectionWide: { type: 'boolean', default: false },
+    sectionMinHeight: {  type: 'integer', default: 0  },
+	},
+
+
+/*=============================================================================*/
+/*                                    EDIT                                     */
+/*=============================================================================*/
+
+	edit(props) {
+    const atts = props.attributes;
+    const [tempHeight, setTempHeight] = useState();
+    const [ isResizing, setIsResizing ] = useState( false );
+    const innerBlockCount = useSelect( ( select ) => select( 'core/block-editor' ).getBlocks( props.clientId ).length,  [ props.clientId ] );
+
+		return (
+      <Fragment>
+
+        {/* BLOCK CONTROLS IMPORT */}
+        <Controls propsObject={props} />
+
+        {/* EDIT RENDER
+        ========================================================================*/}
+
+        <div
+          className={ "k-bs-section-block "+atts.className }
+          data-inner-block-count={ innerBlockCount }
+          style={ {
+            color: atts.color,
+            backgroundColor: atts.bgColor,
+            backgroundImage:
+            ( atts.bgGradient ? atts.bgGradient : 'none' ) + ',' +
+            ( atts.bgImage ? ( "url('"+atts.bgImage+"')" ) : 'none' ),
+            backgroundSize: ( (atts.bgImageType=='cover') ? 'auto, cover' : ( (atts.bgImageType=='cover') ? 'auto, contain' : 'auto, auto' ) ),
+            backgroundRepeat: ( (atts.bgImageType!='repeat') ? 'no-repeat,no-repeat' : 'no-repeat,repeat' ),
+            backgroundPosition: ( (atts.bgImageType!='repeat') ? ( 'center,'+(atts.bgImageFocal.x*100)+'% '+(atts.bgImageFocal.y*100)+'%' ) : 'center,center' ),
+            paddingLeft: ( atts.isSectionWide ? "16px" : "0" ),
+            paddingRight: ( atts.isSectionWide ? "16px" : "0" ),
+          } }
+        >
+          <ResizableBox
+            className={ 'k-bs-section-block_resizer'+( isResizing ? ' is-resizing' : '' ) }
+            enable={ { top: false, right: false, bottom: true, left: false, topRight: false, bottomRight: false, bottomLeft: false, topLeft: false } }
+            onResize={ ( _event, _direction, elt ) => {
+              setTempHeight(elt.clientHeight);
+              props.setAttributes( {sectionMinHeight: elt.clientHeight} );
+              if ( !isResizing ) setIsResizing( true );
+            } }
+            onResizeStop={ ( _event, _direction, elt ) => {
+              setTempHeight( elt.parentNode.clientHeight );
+              setIsResizing( false );
+            } }
+            size={{ height: tempHeight }}
+            minHeight="0"
+          />
+          <div
+            className={ "k-bs-section-block-content-wrapper "+( atts.isSectionWide ? "" : "k-editor-container " )+bootstrapValignClasses(atts.valign) }
+            style={ {minHeight: atts.sectionMinHeight} }
+          >
+            <div className={ 'k-bs-section-block-inner-content' }>
+              <InnerBlocks />
+            </div>
+          </div>
+        </div>
+
+    </Fragment>
+		);
+	},
+
+
+  /*===========================================================================*/
+  /*                                   SAVE                                    */
+  /*===========================================================================*/
+
+	save(props) {
+      const atts = props.attributes;
+      return (
+
+        <div
+          className="k-bs-section-block"
+          style={ {
+            color: atts.color,
+            backgroundColor: atts.bgColor,
+            backgroundImage:
+            ( atts.bgGradient ? atts.bgGradient : 'none' ) + ',' +
+            ( atts.bgImage ? ( "url('"+atts.bgImage+"')" ) : 'none' ),
+            backgroundSize: ( (atts.bgImageType=='cover') ? 'auto, cover' : ( (atts.bgImageType=='cover') ? 'auto, contain' : 'auto, auto' ) ),
+            backgroundRepeat: ( (atts.bgImageType!='repeat') ? 'no-repeat,no-repeat' : 'no-repeat,repeat' ),
+            backgroundPosition: ( (atts.bgImageType!='repeat') ? ( 'center,'+(atts.bgImageFocal.x*100)+'% '+(atts.bgImageFocal.y*100)+'%' ) : 'center,center' ),
+            paddingLeft: ( atts.isSectionWide ? "16px" : "0" ),
+            paddingRight: ( atts.isSectionWide ? "16px" : "0" ),
+          } }
+        >
+          <div
+            className={ "k-bs-section-block-content-wrapper "+( atts.isSectionWide ? "" : "container " )+bootstrapValignClasses(atts.valign) }
+            style={ {minHeight: atts.sectionMinHeight} }
+          >
+            <div className={ 'k-bs-section-block-inner-content' }>
+              <InnerBlocks.Content />
+            </div>
+          </div>
+        </div>
+
+		);
+
+	},
+} );

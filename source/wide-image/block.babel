@@ -1,0 +1,233 @@
+/** @jsx wp.element.createElement */
+
+const { __ } = wp.i18n;
+const { registerBlockType } = wp.blocks;
+const { InnerBlocks, MediaPlaceholder } = wp.blockEditor;
+const { Dashicon, SVG, Path } = wp.components;
+const { useState, useEffect, Fragment } = wp.element;
+
+import { bootstrapValignClasses } from '../common/common-functions.js';
+import { Controls } from './controls.js';
+
+const WideBlockIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+		<path d="M10 2H0V18H10V2Z" fill="#6000FF"/>
+		<path d="M20 2H10V18H20V2Z" fill="#C4C4C4"/>
+	</svg>
+)
+
+
+/*=============================================================================*/
+/*                        Wide Image Text Block Start                          */
+/*=============================================================================*/
+
+registerBlockType( 'k-blocks-text-wide/k-blocks', {
+	title: __( 'Section Wide Image' ),
+	icon: WideBlockIcon,
+	category: 'k-common-blocks',
+	parent: [ 'core/post-content' ], // only root block
+	supports: { align: [ 'full' ], anchor: true, html : false},
+	attributes: {
+		align: { type: 'string', default: 'full', },
+		reverse: { type: 'boolean', default: false, },
+		image: { type: 'string', default: 'unset', },
+    video: { type: 'string', default: '', },
+		valign: { type: 'string', default: 'top', },
+    third: { type: 'boolean', default: false, },
+    color: { type: 'string', default: 'inherit', },
+    bgColor: { type: 'string', default: 'transparent', },
+    bgGradient: { type: 'string', default: 'none', },
+    bgImage: { type: 'string', default: 'none', },
+    bgImageId: { type: 'integer', default: 0 },
+    bgImageType: { type: 'string', default: 'cover', },
+    className: { type: 'string', },
+    anchor: { type: 'string', },
+	},
+
+
+  /*=============================================================================*/
+  /*                                    EDIT                                     */
+  /*=============================================================================*/
+
+	edit(props) {
+
+		const [blockWidth, setBlockWidth] = useState( document.getElementsByClassName('edit-post-visual-editor')[0].clientWidth );
+
+		function calculateMarginValue() {
+			if ( document.body.clientWidth >= 991 ) {
+				if ( props.attributes.align == 'full' ) {
+					return  'calc( ' + (props.attributes.third ? '150%' : '100%') + ' - ' + (document.getElementsByClassName('edit-post-visual-editor')[0].clientWidth)/2 + 'px )' ;
+				} else {
+					return '0';
+				}
+			}
+		};
+
+		function rerenderIfChanged() {
+			setBlockWidth( document.getElementsByClassName('edit-post-visual-editor')[0].clientWidth );
+		}
+
+		useEffect(() => {
+			setTimeout( function() {rerenderIfChanged();} , 50);
+			window.addEventListener( "resize", rerenderIfChanged );
+			document.body.addEventListener( "click", function() { setTimeout( function() {rerenderIfChanged();} , 5); } );
+		});
+
+		var editStyle = { 	backgroundImage: props.attributes.image, position: 'relative' };
+		if ( props.attributes.reverse == false ) {
+			editStyle.marginLeft = calculateMarginValue();
+		} else {
+			editStyle.marginRight = calculateMarginValue();
+		}
+
+    function selectMedia(media) {
+      switch (media.type) {
+        case 'image':
+          props.setAttributes( { image: "url('"+media.url+"')" } );
+          props.setAttributes( { video: "" } );
+          break;
+        case 'video':
+          props.setAttributes( { image: "unset" } );
+          props.setAttributes( { video: media.url } );
+          break;
+      }
+      console.log(media);
+    }
+
+		return (
+    <Fragment>
+
+      {/* BLOCK CONTROLS IMPORT */}
+      <Controls propsObject={props} />
+
+      {/* EDIT RENDER
+      ========================================================================*/}
+
+      <div
+        className="k-bs-section-block"
+        style={ {
+          color: props.attributes.color,
+          backgroundColor: props.attributes.bgColor,
+          backgroundImage:
+          ( props.attributes.bgGradient ? props.attributes.bgGradient : 'none' ) + ',' +
+          ( props.attributes.bgImage ? ( "url('"+props.attributes.bgImage+"')" ) : 'none' ),
+          backgroundSize: ( (props.attributes.bgImageType=='cover') ? 'auto, cover' : ( (props.attributes.bgImageType=='contain') ? 'auto, contain' : 'auto, auto' ) ),
+          backgroundRepeat: ( (props.attributes.bgImageType!='repeat') ? 'no-repeat,no-repeat' : 'no-repeat,repeat' ),
+          backgroundPosition: ( (props.attributes.bgImageType!='repeat') ? 'center, center' : 'center,center' ),
+          paddingLeft: ( props.attributes.isSectionWide ? "16px" : "0" ),
+          paddingRight: ( props.attributes.isSectionWide ? "16px" : "0" ),
+        } }
+      >
+
+        <div class="k-wide-block-container k-editor-container m-auto">
+          <div className={ 'k-wide-block-row no-gutters row px-lg-0' + ( props.attributes.reverse ? ' flex-row-reverse' : '' ) }>
+
+            <div className={'k-wide-block-col-bgimg '+(props.attributes.third ? 'col-lg-4' : 'col-lg-6')+' px-lg-0 '+bootstrapValignClasses(props.attributes.valign) }>
+              <div
+                className={ ( props.attributes.reverse ? 'outer-img-right' : 'outer-img-left' ) }
+                style={ editStyle }
+              >
+                { ( props.attributes.image == 'unset' && props.attributes.video == '' ) && (
+                  <MediaPlaceholder
+                    className = { 'h-100' }
+                    onSelect = { selectMedia }
+                   allowedTypes = { [ 'image', 'video' ] }
+                   multiple = { false }
+                   /*labels = { { title: 'The Image' } }*/
+                   icon = { ( <Dashicon icon="format-image" /> ) }
+                 >
+                 </MediaPlaceholder>
+               ) }
+               { props.attributes.video != '' && (
+                 <video
+                   style = { { position:"absolute",overflow:"hidden",width:"100%",height:"100%",objectFit:"cover",top:"50%",left:"50%",transform:"translate(-50%,-50%)" } }
+                   autoplay = "autoplay"
+                   loop = "loop"
+                   src = { props.attributes.video }
+                 >
+                 </video>
+               ) }
+							</div>
+						</div>
+
+						<div className={'k-wide-block-col-content '+(props.attributes.third ? 'col-lg-8' : 'col-lg-6')+' px-lg-0 '+bootstrapValignClasses(props.attributes.valign) }>
+							<div className="k-wide-block-inercontent px-lg-3 py-4">
+								<InnerBlocks  />{props.attributes.bgImageID}
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+		</div>
+
+    </Fragment>
+		);
+	},
+
+
+  /*===========================================================================*/
+  /*                                   SAVE                                    */
+  /*===========================================================================*/
+
+	save(props) {
+
+		var offcetFront = '0';
+		var bgImgStylesObj = {
+			backgroundImage: props.attributes.image,
+      position: 'relative',
+		}
+		if ( props.attributes.align != 'full' ) {
+			bgImgStylesObj['marginLeft'] = '0';
+			bgImgStylesObj['marginRight'] = '0';
+		};
+
+    {/* SAVE RENDER
+    =========================================================================*/}
+
+		return (
+      <div
+        className="k-bs-section-block"
+        style={ {
+          color: props.attributes.color,
+          backgroundColor: props.attributes.bgColor,
+          backgroundImage:
+          ( props.attributes.bgGradient ? props.attributes.bgGradient : 'none' ) + ',' +
+          ( props.attributes.bgImage ? ( "url('"+props.attributes.bgImage+"')" ) : 'none' ),
+          backgroundSize: ( (props.attributes.bgImageType=='cover') ? 'auto, cover' : ( (props.attributes.bgImageType=='contail') ? 'auto, contain' : 'auto, auto' ) ),
+          backgroundRepeat: ( (props.attributes.bgImageType!='repeat') ? 'no-repeat,no-repeat' : 'no-repeat,repeat' ),
+          backgroundPosition: ( (props.attributes.bgImageType!='repeat') ? 'center, center' : 'center,center' ),
+          paddingLeft: ( props.attributes.isSectionWide ? "16px" : "0" ),
+          paddingRight: ( props.attributes.isSectionWide ? "16px" : "0" ),
+        } }
+      >
+				<div className="k-wide-block-container container">
+					<div className={ 'k-wide-block-row row px-lg-0' + ( props.attributes.reverse ? ' flex-row-reverse' : '' ) }>
+						<div className={'k-wide-block-col-bgimg '+(props.attributes.third ? 'col-lg-4' : 'col-lg-6')+' px-lg-0 '+bootstrapValignClasses(props.attributes.valign) }>
+							<div
+								className={ ( props.attributes.reverse ? 'outer-img-right' : 'outer-img-left' ) + ( props.attributes.third ? ' third' : '' ) }
+								style={bgImgStylesObj}
+              >
+                { props.attributes.video != '' && (
+                  <video
+                    style = { { position:"absolute",overflow:"hidden",width:"100%",height:"100%",objectFit:"cover",top:"50%",left:"50%",transform:"translate(-50%,-50%)" } }
+                    autoplay = "autoplay"
+                    loop = "loop"
+                    src = { props.attributes.video }
+                  >
+                  </video>
+                ) }
+							</div>
+						</div>
+						<div className={'k-wide-block-col-content '+(props.attributes.third ? 'col-lg-8' : 'col-lg-6')+' px-lg-0 '+bootstrapValignClasses(props.attributes.valign) }>
+							<div className="k-wide-block-inercontent px-lg-3 py-4" >
+								<InnerBlocks.Content  />
+							</div>
+						</div>
+					</div>
+	      </div>
+			</div>
+		);
+
+	},
+} );

@@ -1,0 +1,64 @@
+/** @jsx wp.element.createElement */
+
+export function StartBlockPlaceholder(args) {
+
+  /* definitions */
+
+  const props = args.propsObject;
+
+  const { __ } = wp.i18n;
+  const { MediaUpload, MediaUploadCheck, MediaPlaceholder, MediaReplaceFlow } = wp.blockEditor;
+  const { Button, ToolbarGroup, Toolbar, ToolbarButton, Dashicon, SVG, Path, PanelBody, PanelRow, SelectControl, IconButton } = wp.components;
+  const { useState, useEffect, Fragment } = wp.element;
+  const { useSelect } = wp.data;
+
+  var addClass = (props.attributes.className) ? " "+props.attributes.className : "";
+  function createChild( xs=0, sm=0, md=6, lg=0, xl=0 ) {
+    return wp.blocks.createBlock('k-blocks-bs-grid-child/k-blocks', {
+      className: '',
+      colBreakpoint: xs,
+      colSmBreakpoint: sm,
+      colMdBreakpoint: md,
+      colLgBreakpoint: lg,
+      colXlBreakpoint: xl,
+    })
+  }
+  function add_two_columns() {
+    for ( let i=1; i<=2; i++ ) {
+      wp.data.dispatch('core/block-editor').insertBlocks(createChild(), null, props.clientId);
+    }
+  }
+  function add_three_columns() {
+    for ( let i=1; i<=3; i++ ) {
+      wp.data.dispatch('core/block-editor').insertBlocks(createChild(0,0,4,0,0), null, props.clientId);
+    }
+  }
+  function add_four_columns() {
+    for ( let i=1; i<=4; i++ ) {
+      wp.data.dispatch('core/block-editor').insertBlocks(createChild(0,0,3,0,0), null, props.clientId);
+    }
+  }
+
+  /* output */
+
+  return (
+
+    <div className="components-placeholder is-large">
+      <div className="components-placeholder__label">
+        <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M23.75 3.75H1.25V21.25H23.75V3.75Z" fill="#C4C4C4" stroke="#6000FF" stroke-width="2"/>
+          <path d="M16.25 5H8.75V20H16.25V5Z" fill="#6000FF"/>
+        </svg>
+        Bootstrap Columns
+      </div>
+      <div className="components-placeholder__instructions mb-3">Select a variation to start with.</div>
+      <div className="components-placeholder__fieldset">
+        <Button isSecondary onClick={add_two_columns}>2 Equal Columns</Button>
+        <Button isSecondary onClick={add_three_columns}>3 Equal Columns</Button>
+        <Button isSecondary onClick={add_four_columns}>4 Equal Columns</Button>
+      </div>
+    </div>
+
+  );
+
+}

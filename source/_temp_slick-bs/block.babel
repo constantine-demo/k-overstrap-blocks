@@ -1,0 +1,177 @@
+/** @jsx wp.element.createElement */
+
+const { __ } = wp.i18n;
+const { registerBlockType } = wp.blocks;
+const { InnerBlocks } = wp.blockEditor;
+const { BlockControls, InspectorControls, BlockEdit, useBlockProps  } = wp.blockEditor;
+const { useState, Fragment, useEffect } = wp.element;
+const { serverSideRender } = wp;
+const { Button, ServerSideRender } = wp.components;
+const { withDispatch, useDispatch, useSelect } = wp.data;
+
+import { bootstrapValignClasses } from '../common/common-functions.js';
+import { PannelUltimateBgControl } from '../common/PannelUltimateBgControl.js';
+import { Controls } from './controls.js';
+
+
+const SectionBlockIcon = () => (
+  <svg width="20" height="24" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M18 3H2C1.44772 3 1 3.44772 1 4V20C1 20.5523 1.44772 21 2 21H18C18.5523 21 19 20.5523 19 20V4C19 3.44772 18.5523 3 18 3Z" fill="#c10000"/>
+  </svg>
+)
+
+
+/*============================================================================*/
+/*                              PARENTBLOCK BEGIN                             */
+/*============================================================================*/
+
+registerBlockType( 'k-blocks-bs-slider-parent/k-blocks', {
+	title: __( 'BS slider' ),
+	icon: SectionBlockIcon,
+	category: 'k-common-blocks',
+	//parent: [ 'core/post-content' ], // only root block
+	supports: { align: [ 'full' ], anchor: true, html : false},
+	attributes: {
+    className: { type: 'string' },
+    anchor: { type: 'string' },
+	},
+
+
+/*=============================================================================*/
+/*                                    EDIT                                     */
+/*=============================================================================*/
+
+	edit(props) {
+
+    /*const innerBlocks = useSelect(
+      ( select ) =>
+        select( 'core/block-editor' ).getBlocks( props.clientId ),
+      [ props.clientId ]
+    );
+    console.log(innerBlocks);*/
+
+    /*withDispatch( ( dispatch, ownProps, registry ) => {
+    return {
+      updateEditable( isEditing ) {
+        const { clientId, setAttributes } = ownProps;
+        const { getBlockOrder, getBlock } = registry.select( 'core/block-editor' );
+
+        //get all innerBlockIds
+        const innerBlockIds = getBlockOrder( clientId );
+        innerBlockIds.forEach( ( innerBlockId ) => {
+          console.log( getBlock( innerBlockId ) );
+        } );
+      },
+    };
+  } )*/
+
+  console.log( wp.data.select( 'core/block-editor' ).getBlock( props.clientId ) );
+  //console.log( props );
+  //console.log( InnerBlocks );
+
+  useEffect(() => {
+    jQuery(".k-block-backend>div>.block-editor-block-list__layout").not('.slick-initialized').slick({
+      slidesToShow: 1,
+      arrows: true,
+      dots: true,
+      infinite: true,
+      autoplay: false,
+      adaptiveHeight: true,
+    });
+  });
+
+		return (
+      <Fragment>
+
+        {/* BLOCK CONTROLS IMPORT */}
+        <Controls propsObject={props} />
+
+        {/* EDIT RENDER
+        ========================================================================*/}
+
+        <div className={ "k-block-backend "+props.attributes.className }>
+
+          <h1>PARENT HEADER CONTENT - EDIT</h1>
+
+          <InnerBlocks
+            allowedBlocks={[ 'k-blocks-bs-slider-child/k-blocks' ]}
+            renderAppender={ () => (<InnerBlocks.ButtonBlockAppender />) }
+            orientation="vertical"
+            templateLock="all"
+          />
+
+        </div>
+
+      </Fragment>
+		);
+	},
+
+
+  /*===========================================================================*/
+  /*                                   SAVE                                    */
+  /*===========================================================================*/
+
+	save(props) { return (
+
+    <div className={ "k-block-backend "+props.attributes.className }>
+
+      <h1>PARENT HEADER CONTENT - SAVE</h1>
+
+      <InnerBlocks.Content/>
+
+    </div>
+
+  ); },
+
+    } );
+
+
+
+    /*============================================================================*/
+    /*                             CHILD BLOCK BEGIN                              */
+    /*============================================================================*/
+
+    registerBlockType( 'k-blocks-bs-slider-child/k-blocks', {
+      title: __( 'slider Slide' ),
+    	icon: SectionBlockIcon,
+    	category: 'k-common-blocks',
+    	parent: [ 'k-blocks-bs-slider-parent' ],
+    	supports: { html: false, className: false },
+    	attributes: {
+        className: { type: 'string', },
+        content: { type: 'string', },
+    	},
+
+
+    /*=============================================================================*/
+    /*                                    EDIT                                     */
+    /*=============================================================================*/
+
+    	edit(props ) {
+
+    		return (
+          <Fragment>
+            <div className={ "bg-primary text-white p-3 mb-3" }>
+              <InnerBlocks
+                templateInsertUpdatesSelection={ true }
+              />
+              </div>
+          </Fragment>
+    		);
+    	},
+
+    /*===========================================================================*/
+    /*                                   SAVE                                    */
+    /*===========================================================================*/
+
+  	save(props) {
+          return (
+            <Fragment>
+              <div className={ "bg-primary text-white p-3 mb-3" }>
+                <InnerBlocks.Content />
+              </div>
+            </Fragment>
+  		);
+
+  	},
+} );

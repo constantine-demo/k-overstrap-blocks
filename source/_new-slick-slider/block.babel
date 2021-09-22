@@ -1,0 +1,179 @@
+/** @jsx wp.element.createElement */
+
+const { __ } = wp.i18n;
+const { registerBlockType } = wp.blocks;
+const { InnerBlocks } = wp.blockEditor;
+const { serverSideRender } = wp;
+const { BlockVerticalAlignmentToolbar, BlockControls, InspectorControls, AlignmentToolbar } = wp.blockEditor;
+const { Button, ToolbarGroup, Toolbar, ToolbarButton, Dashicon, SVG, Path, PanelBody, PanelRow, SelectControl } = wp.components;
+const { useState, useEffect, Fragment } = wp.element;
+
+import { bootstrapValignClasses } from '../common/common-functions.js';
+import { PannelUltimateBgControl } from '../common/PannelUltimateBgControl.js';
+import { ControlsSetParent } from './controls-parent.js';
+import { ControlsSetChild } from './controls-child.js';
+
+const SectionBlockIcon = () => (
+  <svg width="20" height="24" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M18 3H2C1.44772 3 1 3.44772 1 4V20C1 20.5523 1.44772 21 2 21H18C18.5523 21 19 20.5523 19 20V4C19 3.44772 18.5523 3 18 3Z" fill="#c10000"/>
+  </svg>
+)
+
+
+/*============================================================================*/
+/*                              PARENTBLOCK BEGIN                             */
+/*============================================================================*/
+
+const withCustomClassName = wp.compose.createHigherOrderComponent( ( BlockListBlock ) => {
+  return ( props ) => {
+  if ( props.name !== 'k-blocks-slick-test-child/k-blocks' ) {
+    return <BlockListBlock { ...props } />
+  }
+  return (
+    <div class="k-blocks-slick-test-slide-content d-block">
+      <BlockListBlock { ...props } className={ "d-block" } />
+    </div>
+  ); };
+}, 'withClientIdClassName' );
+wp.hooks.addFilter( 'editor.BlockListBlock', 'example/filter-blocks', withCustomClassName );
+
+
+registerBlockType( 'k-blocks-slick-test-parent/k-blocks', {
+	title: __( 'Test Slick Slider' ),
+	icon: SectionBlockIcon,
+	category: 'k-common-blocks',
+	//parent: [ 'core/post-content' ], // only root block
+	supports: { align: [ 'full' ], anchor: true, html : false},
+	attributes: {
+    className: { type: 'string' },
+    anchor: { type: 'string' },
+    blockID: { type: 'string', default: '' },
+	},
+
+
+/*=============================================================================*/
+/*                                    EDIT                                     */
+/*=============================================================================*/
+
+	edit(props) {
+
+    const att = props.attributes;
+    const [editMode, setEditMode] = useState(false);
+    if ( props.attributes.blockID != props.clientId ) props.setAttributes( { blockID: props.clientId } );
+    props.editMode = editMode;
+    props.toggleEditMode = function() { setEditMode(!editMode); };
+    props.setEditMode = (par) => { setEditMode(par); };
+
+		return (
+      <Fragment>
+
+        {/* BLOCK CONTROLS IMPORT */}
+
+        <ControlsSetParent propsObject={props} />
+
+        {/* EDIT RENDER
+        ========================================================================*/}
+
+        <div className={
+          "k-blocks-slick-test-parent backend"+
+          ( att.className ? " "+att.className : "")+
+          (editMode ? " editmode" : " viewmode" )+
+          " hero-gallery-"+att.blockID
+        }>
+
+          <InnerBlocks
+            allowedBlocks={[ 'k-blocks-slick-test-child/k-blocks' ]}
+            orientation="vertiсal"
+            templateLock={ editMode ? false : "all" }
+            renderAppender={ editMode ? () => <InnerBlocks.ButtonBlockAppender /> : false }
+          />
+
+        </div>
+
+      </Fragment>
+		);
+	},
+
+
+  /*===========================================================================*/
+  /*                                   SAVE                                    */
+  /*===========================================================================*/
+
+	save(props) {
+
+    const att = props.attributes;
+    const frontEndScript = `
+    jQuery(document).ready(function($) {
+      $(".hero-gallery-`+att.blockID+`").slick({
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        adaptiveHeight: true
+      });
+    });`;
+
+    return (
+        <Fragment>
+          <div className={ "k-blocks-slick-test-parent hero-gallery-"+att.blockID }>
+            <InnerBlocks.Content />
+          </div>
+          <script dangerouslySetInnerHTML={{ __html: frontEndScript}} />
+        </Fragment>
+        ); },
+
+    } );
+
+
+
+    /*============================================================================*/
+    /*                             CHILD BLOCK BEGIN                              */
+    /*============================================================================*/
+
+    registerBlockType( 'k-blocks-slick-test-child/k-blocks', {
+      title: __( 'Slide' ),
+    	icon: SectionBlockIcon,
+    	category: 'k-common-blocks',
+    	parent: [ 'k-blocks-slick-test-parent' ],
+    	supports: { html: false, className: false },
+    	attributes: {
+        className: { type: 'string', },
+        content: { type: 'string', },
+    	},
+
+/*=============================================================================*/
+/*                                    EDIT                                     */
+/*=============================================================================*/
+
+	edit(props) {
+
+		return (
+      <Fragment>
+
+        {/* BLOCK CONTROLS IMPORT */}
+
+        <ControlsSetChild propsObject={props} />
+
+        <div className={ "bg-primary text-white p-3" }>
+          <InnerBlocks
+            templateLock={false}
+          />
+        </div>
+
+      </Fragment>
+		);
+	},
+
+  /*===========================================================================*/
+  /*                                   SAVE                                    */
+  /*===========================================================================*/
+
+	save(props) {
+        return (
+          <Fragment>
+            <div className={ "bg-primary text-white p-3" }>
+              <InnerBlocks.Content />
+            </div>
+          </Fragment>
+		);
+
+	},
+} );

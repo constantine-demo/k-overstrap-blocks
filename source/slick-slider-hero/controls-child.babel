@@ -1,0 +1,78 @@
+/** @jsx wp.element.createElement */
+
+import { PannelUltimateBgControl } from '../common/PannelUltimateBgControl.js';
+
+export function ControlsSetChild(args) {
+
+  /* definitions */
+
+  const props = args.propsObject;
+  const att = args.propsObject.attributes;
+
+  const { __ } = wp.i18n;
+  const { MediaUpload, MediaUploadCheck, MediaPlaceholder, MediaReplaceFlow } = wp.blockEditor;
+  const { BlockVerticalAlignmentToolbar, BlockControls, InspectorControls, AlignmentToolbar } = wp.blockEditor;
+  const {
+    Button, ToolbarGroup, Toolbar, ToolbarButton, Dashicon, SVG, Path, PanelBody, PanelRow,
+    SelectControl, IconButton, DropdownMenu, MenuGroup, MenuItem, MenuItemsChoice
+  } = wp.components;
+  const { useState, useEffect, Fragment } = wp.element;
+  const { useSelect } = wp.data;
+
+  const SectionBlockButtonWide = () => (
+    <svg width="20" height="24" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18 3H2C1.44772 3 1 3.44772 1 4V20C1 20.5523 1.44772 21 2 21H18C18.5523 21 19 20.5523 19 20V4C19 3.44772 18.5523 3 18 3Z" fill="white"/>
+      <path d="M11 4H9V20H11V4Z" fill="black"/>
+      <path d="M2 12L8 8V16L2 12Z" fill="black"/>
+      <path d="M18 12L12 8V16L18 12Z" fill="black"/>
+    </svg>
+  )
+
+  return (
+
+    <Fragment>
+
+      <BlockControls>
+        <Toolbar>
+          <ToolbarButton
+            icon={ SectionBlockButtonWide }
+            label={ __( "Make content conteiner full width" ) }
+            onClick = { () => { props.setAttributes( { contentWide: !att.contentWide } ) } }
+            isActive = { att.contentWide }
+          />
+        </Toolbar>
+        <BlockVerticalAlignmentToolbar
+          onChange={ ( newcontent ) => { props.setAttributes( { valign: newcontent } ); } }
+          value={ props.attributes.valign }
+        />
+      </BlockControls>
+
+      <InspectorControls>
+        <PannelUltimateBgControl
+          // first toolbar: color block
+          colorValue={ att.color }
+          onColorChange={ ( newVal ) => props.setAttributes({ color: newVal }) }
+          bgColorValue={ att.bgColor }
+          onBgColorChange={ ( newVal ) => props.setAttributes({ bgColor: newVal }) }
+          // second toolbar: image block
+          bgImgUrlValue={ att.bgImage }
+          bgImgIdValue={ att.bgImageId }
+          onBgImgSelect={ ( newVal ) => props.setAttributes({ bgImage: newVal.url, bgImageId: newVal.id }) }
+          onSetDefaultClick={ () => props.setAttributes({ bgImage: "none", bgImageId: 0 }) }
+          // bg focal for second toolbar: optional
+          bgFocalValue={ att.bgImageFocal }
+          onBgImageFocalChange={ ( newVal ) => props.setAttributes({ bgImageFocal: newVal }) }
+          // bg style for second toolbar: optional
+          bgStyleValue={ att.bgImageType }
+          onBgStyleChange={ ( newVal ) => props.setAttributes({ bgImageType: newVal }) }
+          // third toolbar: gradient overlay block
+          gradientOvelayValue={ att.bgGradient }
+          onGradientOverlayChange={ ( newVal ) => props.setAttributes({ bgGradient: newVal }) }
+        />
+      </InspectorControls>
+
+    </Fragment>
+
+  );
+
+}

@@ -1,0 +1,208 @@
+'use strict';
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _attributes;
+
+var _commonFunctions = require('../common/common-functions.js');
+
+var _PannelUltimateBgControl = require('../common/PannelUltimateBgControl.js');
+
+var _controls = require('./controls.js');
+
+var _controlsChild = require('./controls-child.js');
+
+var _startBlockPlaceholder = require('./start-block-placeholder.js');
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+/** @jsx wp.element.createElement */
+
+var __ = wp.i18n.__;
+var registerBlockType = wp.blocks.registerBlockType;
+var InnerBlocks = wp.blockEditor.InnerBlocks;
+var _wp$blockEditor = wp.blockEditor,
+    BlockControls = _wp$blockEditor.BlockControls,
+    InspectorControls = _wp$blockEditor.InspectorControls,
+    BlockEdit = _wp$blockEditor.BlockEdit;
+var _wp$element = wp.element,
+    useState = _wp$element.useState,
+    Fragment = _wp$element.Fragment,
+    useEffect = _wp$element.useEffect;
+var useSelect = wp.data.useSelect;
+var Button = wp.components.Button;
+
+
+var RowBlockIcon = function RowBlockIcon() {
+  return wp.element.createElement(
+    'svg',
+    { width: '20', height: '20', viewBox: '0 0 20 20', fill: 'none', xmlns: 'http://www.w3.org/2000/svg' },
+    wp.element.createElement('path', { d: 'M19 3H1V17H19V3Z', fill: '#C4C4C4', stroke: '#6000FF', 'stroke-width': '2' }),
+    wp.element.createElement('path', { d: 'M13 4H7V16H13V4Z', fill: '#6000FF' })
+  );
+};
+var ColBlockIcon = function ColBlockIcon() {
+  return wp.element.createElement(
+    'svg',
+    { width: '20', height: '20', viewBox: '0 0 20 20', fill: 'none', xmlns: 'http://www.w3.org/2000/svg' },
+    wp.element.createElement('path', { d: 'M19 2H1V18H19V2Z', fill: '#C4C4C4' }),
+    wp.element.createElement('path', { d: 'M13 3H7V17H13V3Z', fill: 'white', stroke: '#6000FF', 'stroke-width': '2' })
+  );
+};
+
+function addBlockClass(props) {
+  return props.attributes.className ? " " + props.attributes.className : "";
+};
+function addCenterClass(props) {
+  return props.attributes.halign ? " justify-content-center" : "";
+};
+function addValignClass(props) {
+  return props.attributes.valign ? " " + props.attributes.valign : "";
+};
+
+/*============================================================================*/
+/*                              PARENTBLOCK BEGIN                             */
+/*============================================================================*/
+
+registerBlockType('k-blocks-bs-grid/k-blocks', {
+  title: __('Boostrap Grid'),
+  icon: RowBlockIcon,
+  category: 'k-common-blocks',
+  //parent: [ 'core/post-content' ], // only root block
+  supports: { anchor: true, html: false },
+  attributes: {
+    className: { type: 'string', default: '' },
+    anchor: { type: 'string', default: '' },
+    halign: { type: 'boolean', default: false },
+    valign: { type: 'string', default: 'align-items-stretch' },
+    noGutters: { type: 'boolean', default: false }
+  },
+
+  /*-----------------------------------------------------------------------------*/
+  /*                                PARENT EDIT                                  */
+  /*-----------------------------------------------------------------------------*/
+
+  edit: function edit(props) {
+
+    var innerBlockCount = useSelect(function (select) {
+      return select('core/block-editor').getBlocks(props.clientId).length;
+    }, [props.clientId]);
+
+    return wp.element.createElement(
+      Fragment,
+      null,
+      wp.element.createElement(_controls.Controls, { propsObject: props }),
+      wp.element.createElement(
+        'div',
+        { className: "k-bs-grid" + addBlockClass(props) + " grid-align-" + props.attributes.valign + (props.attributes.halign ? " has-centered-block-edit" : "") + (props.attributes.noGutters ? " k-bs-grid-no-gutters" : "") },
+        wp.element.createElement(InnerBlocks, {
+          allowedBlocks: ['k-blocks-bs-grid-child/k-blocks'],
+          renderAppender: false,
+          orientation: 'horizontal'
+        }),
+        !innerBlockCount && wp.element.createElement(_startBlockPlaceholder.StartBlockPlaceholder, { propsObject: props })
+      )
+    );
+  },
+
+
+  /*-----------------------------------------------------------------------------*/
+  /*                                PARENT SAVE                                  */
+  /*-----------------------------------------------------------------------------*/
+
+  save: function save(props) {
+
+    var addClass = props.attributes.className ? " " + props.attributes.className : "";
+    var guttersClass = props.attributes.noGutters ? " no-gutters" : "";
+
+    return wp.element.createElement(
+      'div',
+      { className: "k-bs-grid row" + addBlockClass(props) + addCenterClass(props) + addValignClass(props) + guttersClass },
+      wp.element.createElement(InnerBlocks.Content, null)
+    );
+  }
+});
+
+/*-----------------------------------------------------------------------------*/
+/*                              CHILD BLOCK BEGIN                              */
+/*-----------------------------------------------------------------------------*/
+
+/* common functions */
+function bsGetColClasses(props) {
+  var classes = "";
+  if (props.attributes.colBreakpoint != 0) classes += " col-" + props.attributes.colBreakpoint;
+  if (props.attributes.colSmBreakpoint != 0) classes += " col-sm-" + props.attributes.colSmBreakpoint;
+  if (props.attributes.colMdBreakpoint != 0) classes += " col-md-" + props.attributes.colMdBreakpoint;
+  if (props.attributes.colLgBreakpoint != 0) classes += " col-lg-" + props.attributes.colLgBreakpoint;
+  if (props.attributes.colXlBreakpoint != 0) classes += " col-xl-" + props.attributes.colXlBreakpoint;
+  if (classes == "") classes = " col";
+  return classes;
+}
+
+registerBlockType('k-blocks-bs-grid-child/k-blocks', {
+  title: __('Bootstrap Column'),
+  icon: ColBlockIcon,
+  category: 'k-common-blocks',
+  parent: ['k-blocks-bs-grid-child'],
+  supports: { html: false, className: false },
+  attributes: (_attributes = {
+    className: { type: 'string', default: '' },
+    colBreakpoint: { type: 'number', default: 0 },
+    colSmBreakpoint: { type: 'number', default: 0 }
+  }, _defineProperty(_attributes, 'colSmBreakpoint', { type: 'number', default: 0 }), _defineProperty(_attributes, 'colMdBreakpoint', { type: 'number', default: 6 }), _defineProperty(_attributes, 'colLgBreakpoint', { type: 'number', default: 0 }), _defineProperty(_attributes, 'colXlBreakpoint', { type: 'number', default: 0 }), _attributes),
+
+  /*-----------------------------------------------------------------------------*/
+  /*                                EDIT CHILD                                   */
+  /*-----------------------------------------------------------------------------*/
+
+  edit: function edit(props) {
+
+    var hasInnerBlocks = useSelect(function (select) {
+      return select('core/block-editor').getBlocks(props.clientId).length > 0;
+    }, [props.clientId]);
+
+    return wp.element.createElement(
+      Fragment,
+      null,
+      wp.element.createElement(_controlsChild.ControlsChild, { propsObject: props }),
+      wp.element.createElement(InnerBlocks, {
+        renderAppender: hasInnerBlocks ? undefined : function () {
+          return wp.element.createElement(InnerBlocks.ButtonBlockAppender, null);
+        }
+      })
+    );
+  },
+
+
+  /*-----------------------------------------------------------------------------*/
+  /*                                SAVE CHILD                                   */
+  /*-----------------------------------------------------------------------------*/
+
+  save: function save(props) {
+
+    return wp.element.createElement(
+      Fragment,
+      null,
+      wp.element.createElement(
+        'div',
+        { className: "k-bs-grid-col" + addBlockClass(props) + bsGetColClasses(props) },
+        wp.element.createElement(InnerBlocks.Content, null)
+      )
+    );
+  }
+});
+
+/*=============================================================================*/
+/*                ADD CLASS TO NESTED BLOCK WRAPPER WITH FILTER                */
+/*=============================================================================*/
+
+var withCustomClassName = wp.compose.createHigherOrderComponent(function (BlockListBlock) {
+  return function (props) {
+    if (props.name !== 'k-blocks-bs-grid-child/k-blocks') {
+      return wp.element.createElement(BlockListBlock, props);
+    }
+    return wp.element.createElement(BlockListBlock, _extends({}, props, { className: "mx-0 k-bs-grid-admin-col" + bsGetColClasses(props) + addBlockClass(props) }));
+  };
+}, 'withClientIdClassName');
+
+wp.hooks.addFilter('editor.BlockListBlock', 'example/filter-blocks', withCustomClassName);

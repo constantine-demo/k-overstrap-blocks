@@ -1,0 +1,129 @@
+/** @jsx wp.element.createElement */
+
+const { __ } = wp.i18n;
+const { registerBlockType } = wp.blocks;
+const { InnerBlocks, MediaReplaceFlow, BlockVerticalAlignmentToolbar, BlockControls, InspectorControls, AlignmentToolbar, URLPopover, URLInput } = wp.blockEditor;
+const { RichText, Button, ToolbarGroup, Toolbar, ToolbarButton, Panel, PanelBody, PanelRow, Popover } = wp.components;
+const { useState } = wp.element;
+
+import { LinkToolbar } from '../common/LinkToolbar.js';
+import { bootstrapValignClasses } from '../common/common-functions.js';
+
+const BlockIcon = () => (
+	<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+		<path d="M19 4H1V16H19V4Z" fill="#6000FF"/><rect x="4" y="8" width="6" height="4" fill="#C4C4C4"/><rect x="10" y="9" width="6" height="2" fill="#C4C4C4"/>
+	</svg>
+);
+
+
+/*===================================================*/
+/*              Fluid image Link Block               */
+/*===================================================*/
+
+registerBlockType( 'k-blocks-img-link/k-blocks', {
+	title: __( 'Fluid image Link' ),
+	icon: BlockIcon,
+	category: 'k-common-blocks',
+	supports: {
+	    color: { // This also enables text and background UI controls.
+	        gradient: true // Enable gradients UI control.
+	    }
+	},
+	attributes: {
+		supports: {
+		    color: { // This also enables text and background UI controls.
+		        gradient: true // Enable gradients UI control.
+		    }
+		},
+		image: {
+			type: 'string',
+			default: '',
+		},
+		valign: {
+			type: 'string',
+			default: 'center',
+		},
+		className: {
+			type: 'string',
+		},
+		url: {
+			type: 'string',
+			default: '#',
+		},
+		opensInNewTab: {
+			type: 'boolean',
+			default: false,
+		},
+	},
+
+	edit(props) {
+
+		return (
+
+		<div
+			className={ "k-blocks-img-link position-relative "+props.attributes.className }
+			style={ {
+				minHeight: ( props.attributes.image=="" ? '15rem' : 'unset' ),
+				backgroundColor: ( props.attributes.image=="" ? '#f0f0f0' : 'transparent' )
+			} }
+		>
+
+			<BlockControls>
+				<LinkToolbar
+					value={ { url: props.attributes.url, opensInNewTab: props.attributes.opensInNewTab } }
+					onChange={ ( nextValue ) => {
+						if ( nextValue.url != undefined ) props.setAttributes( { url : nextValue.url} );
+						if ( nextValue.opensInNewTab != undefined ) props.setAttributes( { opensInNewTab: nextValue.opensInNewTab} );
+					} }
+				/>
+				<BlockVerticalAlignmentToolbar
+					onChange={ ( newcontent ) => { props.setAttributes( { valign: newcontent } ); } }
+					value={ props.attributes.valign }
+				/>
+				<MediaReplaceFlow
+					mediaURL={ props.attributes.image }
+					allowedTypes={ [ 'image' ] }
+					accept="image/*"
+					name={ __( "Background" ) }
+					onSelect={ ( newcontent ) => {props.setAttributes( { image: newcontent.url } ); } }
+				/>
+			</BlockControls>
+
+			<img class="k-blocks-img-link-img w-100" src={ props.attributes.image } />
+			<div
+				className={'k-blocks-img-link-text-wrapper position-absolute d-flex '+bootstrapValignClasses(props.attributes.valign) }
+				style={ {top: '0', left: '0', right: '0', bottom: '0' } }
+			>
+				<div className="k-blocks-img-link-inner-content px-lg-3 py-4 has-text-align-center">
+					<InnerBlocks allowedBlocks={ [ 'core/paragraph', 'core/heading' ] } />
+				</div>
+			</div>
+
+		</div>
+
+		);
+	},
+
+
+	save(props) {
+
+		return (
+
+		<div className={ "k-big-hero-block position-relative "+props.attributes.className } >
+			<a href={props.attributes.url} target={ props.attributes.opensInNewTab ? "_blank" : false } rel="noopener noreferrer">
+				<img class="k-blocks-img-link-img w-100" src={ props.attributes.image } />
+				<div
+					className={'k-blocks-img-link-text-wrapper position-absolute d-flex '+bootstrapValignClasses(props.attributes.valign) }
+					style={ {top: '0', left: '0', right: '0', bottom: '0' } }
+				>
+					<div className="k-blocks-img-link-inner-content px-lg-3 py-4 has-text-align-center">
+						<InnerBlocks.Content/>
+					</div>
+				</div>
+			</a>
+		</div>
+
+		);
+
+	},
+} );

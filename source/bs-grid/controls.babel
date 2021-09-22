@@ -1,0 +1,93 @@
+/** @jsx wp.element.createElement */
+
+import { PannelUltimateBgControl } from '../common/PannelUltimateBgControl.js';
+
+export function Controls(args) {
+
+  /* definitions */
+
+  const props = args.propsObject;
+
+  const { __ } = wp.i18n;
+  const { MediaUpload, MediaUploadCheck, MediaPlaceholder, MediaReplaceFlow } = wp.blockEditor;
+  const { BlockVerticalAlignmentToolbar, BlockControls, InspectorControls, AlignmentToolbar } = wp.blockEditor;
+  const {
+    Button, ToolbarGroup, Toolbar, ToolbarButton, Dashicon, SVG, Path, PanelBody, PanelRow,
+    SelectControl, IconButton, DropdownMenu, MenuGroup, MenuItem, MenuItemsChoice
+  } = wp.components;
+  const { useState, useEffect, Fragment } = wp.element;
+  const { useSelect } = wp.data;
+  const ColGutterIcon = () => (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect class="active-white" x="1" y="5" width="3" height="10" fill="#1E1E1E"/>
+        <rect class="active-white" x="16" y="5" width="3" height="10" fill="#1E1E1E"/>
+        <path class="active-white" d="M5 10L8.75 7.40192V12.5981L5 10Z" fill="#1E1E1E"/>
+        <path class="active-white" d="M15 10L11.25 12.5981L11.25 7.40192L15 10Z" fill="#1E1E1E"/>
+      </svg>
+  )
+
+  const innerColumnsCount = useSelect( ( select ) => select( 'core/block-editor' ).getBlocks( props.clientId ).length,  [ props.clientId ] );
+
+  function addEmptyColumn() {
+    const block = wp.blocks.createBlock('k-blocks-bs-grid-child/k-blocks', { colMdBreakpoint: 6 });
+    wp.data.dispatch('core/block-editor').insertBlocks(block, innerColumnsCount, props.clientId);
+  }
+
+  /* output */
+
+  return (
+
+    <Fragment>
+
+      <BlockControls>
+        <Toolbar>
+          <ToolbarButton
+            icon={ ColGutterIcon }
+            title='No Gutters'
+            isActive = { props.attributes.noGutters }
+            onClick={ ( ) => { props.setAttributes( { noGutters: !(props.attributes.noGutters) } ); } }
+          />
+        </Toolbar>
+        <Toolbar>
+          <ToolbarButton
+            icon='leftright'
+            title='Center columns'
+            isActive = { props.attributes.halign }
+            onClick={ ( ) => { props.setAttributes( { halign: !(props.attributes.halign) } ); } }
+          />
+        </Toolbar>
+        <Toolbar>
+          <DropdownMenu icon={ 'sort' } label="Select a direction">
+            { ( { onClose } ) => (
+              <MenuGroup label="vertical Align Colums">
+                <MenuItemsChoice
+                  choices={ [
+                    { value: 'align-items-stretch', label: 'Stretch (default)', },
+                    { value: 'align-items-start', label: 'Top', },
+                    { value: 'align-items-center', label: 'Center', },
+                    { value: 'align-items-end', label: 'Bottom', },
+                  ] }
+                  value={ props.attributes.valign }
+                  onSelect={ ( mode ) => props.setAttributes( { valign: mode } ) }
+
+                />
+              </MenuGroup>
+            ) }
+          </DropdownMenu>
+        </Toolbar>
+        <Toolbar>
+          <ToolbarButton
+            icon='plus-alt2'
+            title='Add new column'
+            onClick={ addEmptyColumn }
+          />
+        </Toolbar>
+      </BlockControls>
+
+      <InspectorControls>
+      </InspectorControls>
+
+    </Fragment>
+  );
+
+}
