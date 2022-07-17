@@ -35,7 +35,7 @@ registerBlockType( 'k-blocks-bs-section/k-blocks', {
 	parent: [ 'core/post-content' ], // only root block
 	supports: { align: [ 'full' ], anchor: true, html : false},
 	attributes: {
-		align: {type: 'string' },
+		align: {type: 'string', default: 'full', },
 		valign: { type: 'string', default: 'center', },
     color: { type: 'string', default: 'inherit', },
     bgColor: { type: 'string', default: 'transparent', },
@@ -44,11 +44,10 @@ registerBlockType( 'k-blocks-bs-section/k-blocks', {
     bgImageId: { type: 'integer', default: 0 },
     bgImageType: { type: 'string', default: 'cover', },
     bgImageFocal: { type: 'object', default: { x: '0.5', y: '0.5' } },
-    className: { type: 'string', default: '' },
+    className: { type: 'string', },
     anchor: { type: 'string', },
     isSectionWide: { type: 'boolean', default: false },
     sectionMinHeight: {  type: 'integer', default: 0  },
-    minHeight: { type: 'integer', default: 0 },
 	},
 
 
@@ -72,7 +71,7 @@ registerBlockType( 'k-blocks-bs-section/k-blocks', {
         ========================================================================*/}
 
         <div
-          className={ "k-bs-section-block "+( !(atts.isSectionWide) ? "" : "container-fluid clearfix " )+atts.className }
+          className={ "k-bs-section-block "+atts.className }
           style={ {
             color: atts.color,
             backgroundColor: atts.bgColor,
@@ -82,32 +81,42 @@ registerBlockType( 'k-blocks-bs-section/k-blocks', {
             backgroundSize: ( (atts.bgImageType=='cover') ? 'auto, cover' : ( (atts.bgImageType=='cover') ? 'auto, contain' : 'auto, auto' ) ),
             backgroundRepeat: ( (atts.bgImageType!='repeat') ? 'no-repeat,no-repeat' : 'no-repeat,repeat' ),
             backgroundPosition: ( (atts.bgImageType!='repeat') ? ( 'center,'+(atts.bgImageFocal.x*100)+'% '+(atts.bgImageFocal.y*100)+'%' ) : 'center,center' ),
-            display: ( (atts.minHeight) ? 'flex' : 'block'  ),
-            flexDirection: ( (atts.minHeight) ? 'column' : 'unset'  ),
-            justifyContent: ( (atts.minHeight) ? 'center' : 'unset'  ),
-            minHeight: ( (atts.minHeight) ? atts.minHeight+'Rem' : 'unset'  ),
+            paddingLeft: ( atts.isSectionWide ? "16px" : "0" ),
+            paddingRight: ( atts.isSectionWide ? "16px" : "0" ),
           } }
         >
-          {/*
-            bootstrapValignClasses(atts.valign)
+          <ResizableBox
+            className={ 'k-bs-section-block_resizer'+( isResizing ? ' is-resizing' : '' ) }
+            enable={ { top: false, right: false, bottom: true, left: false, topRight: false, bottomRight: false, bottomLeft: false, topLeft: false } }
+            onResize={ ( _event, _direction, elt ) => {
+              setTempHeight(elt.clientHeight);
+              props.setAttributes( {sectionMinHeight: elt.clientHeight} );
+              if ( !isResizing ) setIsResizing( true );
+            } }
+            onResizeStop={ ( _event, _direction, elt ) => {
+              setTempHeight( elt.parentNode.clientHeight );
+              setIsResizing( false );
+            } }
+            size={{ height: tempHeight }}
+            minHeight="0"
+          />
+          <div
+            className={ "k-bs-section-block-content-wrapper "+( atts.isSectionWide ? "container-fluid " : "container " )+bootstrapValignClasses(atts.valign) }
             style={ {minHeight: atts.sectionMinHeight} }
-          */}
-          <ConditionalWrapper
-            condition = { atts.minHeight }
-            wrapper = { (children) => <div className={ 'k-bs-section-block-inner-content' }> {children} </div> }
           >
-            <ConditionalWrapper
-              condition = {!(atts.isSectionWide)}
-              wrapper = { (children) => <div className={ "k-bs-section-block-container container clearfix" } > {children} </div> }
-            >
+            <div className={ 'k-bs-section-block-inner-content' }>
               <InnerBlocks
-                renderAppender={ hasInnerBlocks ? undefined : () => <InnerBlocks.ButtonBlockAppender /> }
+                renderAppender={
+                  hasInnerBlocks
+                    ? undefined
+                    : () => <InnerBlocks.ButtonBlockAppender />
+                }
               />
-            </ConditionalWrapper>
-          </ConditionalWrapper>
+            </div>
+          </div>
         </div>
 
-      </Fragment>
+    </Fragment>
 		);
 	},
 
@@ -121,7 +130,7 @@ registerBlockType( 'k-blocks-bs-section/k-blocks', {
       return (
 
         <div
-          className={ "k-bs-section-block "+( !(atts.isSectionWide) ? "" : "container-fluid clearfix " )+atts.className }
+          className="k-bs-section-block"
           style={ {
             color: atts.color,
             backgroundColor: atts.bgColor,
@@ -131,23 +140,18 @@ registerBlockType( 'k-blocks-bs-section/k-blocks', {
             backgroundSize: ( (atts.bgImageType=='cover') ? 'auto, cover' : ( (atts.bgImageType=='cover') ? 'auto, contain' : 'auto, auto' ) ),
             backgroundRepeat: ( (atts.bgImageType!='repeat') ? 'no-repeat,no-repeat' : 'no-repeat,repeat' ),
             backgroundPosition: ( (atts.bgImageType!='repeat') ? ( 'center,'+(atts.bgImageFocal.x*100)+'% '+(atts.bgImageFocal.y*100)+'%' ) : 'center,center' ),
-            display: ( (atts.minHeight) ? 'flex' : 'block'  ),
-            flexDirection: ( (atts.minHeight) ? 'column' : 'unset'  ),
-            justifyContent: ( (atts.minHeight) ? 'center' : 'unset'  ),
-            minHeight: ( (atts.minHeight) ? atts.minHeight+'Rem' : 'unset'  ),
+            paddingLeft: ( atts.isSectionWide ? "16px" : "0" ),
+            paddingRight: ( atts.isSectionWide ? "16px" : "0" ),
           } }
         >
-          <ConditionalWrapper
-            condition = { atts.minHeight }
-            wrapper = { (children) => <div className={ 'k-bs-section-block-inner-content' }> {children} </div> }
+          <div
+            className={ "k-bs-section-block-content-wrapper "+( atts.isSectionWide ? "" : "container " )+bootstrapValignClasses(atts.valign) }
+            style={ {minHeight: atts.sectionMinHeight} }
           >
-            <ConditionalWrapper
-              condition = {!(atts.isSectionWide)}
-              wrapper = { (children) => <div className={ "k-bs-section-block-container container clearfix" } > {children} </div> }
-            >
-              <InnerBlocks.Content/>
-            </ConditionalWrapper>
-          </ConditionalWrapper>
+            <div className={ 'k-bs-section-block-inner-content' }>
+              <InnerBlocks.Content />
+            </div>
+          </div>
         </div>
 
 		);

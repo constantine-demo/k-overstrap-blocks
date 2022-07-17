@@ -34,7 +34,8 @@ function Controls(args) {
       Path = _wp$components.Path,
       PanelBody = _wp$components.PanelBody,
       PanelRow = _wp$components.PanelRow,
-      SelectControl = _wp$components.SelectControl;
+      SelectControl = _wp$components.SelectControl,
+      RangeControl = _wp$components.RangeControl;
   var _wp$element = wp.element,
       useState = _wp$element.useState,
       useEffect = _wp$element.useEffect,
@@ -113,6 +114,20 @@ function Controls(args) {
     wp.element.createElement(
       InspectorControls,
       null,
+      wp.element.createElement(
+        PanelBody,
+        { title: __('Options') },
+        wp.element.createElement(RangeControl, {
+          value: props.attributes.minHeight,
+          onChange: function onChange(newvalue) {
+            return props.setAttributes({ minHeight: newvalue });
+          },
+          min: 0,
+          max: 50,
+          label: __('Outer image minimum height' + ' (Rem)'),
+          type: "Rem"
+        })
+      ),
       wp.element.createElement(_PannelUltimateBgControl.PannelUltimateBgControl
       // first toolbar: color block
       , { colorValue: props.attributes.color,
@@ -146,3 +161,4 @@ function Controls(args) {
     )
   );
 } /** @jsx wp.element.createElement */
+//# sourceMappingURL=controls.js.map

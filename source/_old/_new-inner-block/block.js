@@ -164,3 +164,4 @@ registerBlockType('k-blocks-bs-new-child/k-blocks', {
     );
   }
 });
+//# sourceMappingURL=block.js.map

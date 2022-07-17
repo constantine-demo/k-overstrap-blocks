@@ -4,6 +4,7 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 exports.bootstrapValignClasses = bootstrapValignClasses;
+
 /** @jsx wp.element.createElement */
 
 /*===================================================*/
@@ -20,5 +21,5 @@ function bootstrapValignClasses(valign) {
 		case 'bottom':
 			return 'd-flex flex-column justify-content-end';
 	}
-	return '';
+	return 'd-flex flex-column';
 }

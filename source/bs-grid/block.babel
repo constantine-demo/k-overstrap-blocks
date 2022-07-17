@@ -29,7 +29,7 @@ const ColBlockIcon = () => (
 )
 
 function addBlockClass(props) {  return ( props.attributes.className ? " "+props.attributes.className : "" )  };
-function addCenterClass(props) {  return ( props.attributes.halign ? " justify-content-center" : "" )  };
+function addCenterClass(props) {  return ( props.attributes.halign ? " "+props.attributes.halign : "" )  };
 function addValignClass(props) {  return ( props.attributes.valign ? " "+props.attributes.valign : "" )  };
 
 
@@ -46,7 +46,7 @@ registerBlockType( 'k-blocks-bs-grid/k-blocks', {
 	attributes: {
     className: { type: 'string', default: '' },
     anchor: { type: 'string', default: '' },
-    halign: { type: 'boolean', default: false },
+    halign: { type: 'string', default: 'justify-content-start' },
     valign: { type: 'string', default: 'align-items-stretch' },
     noGutters: { type: 'boolean', default: false },
 	},
@@ -71,7 +71,7 @@ registerBlockType( 'k-blocks-bs-grid/k-blocks', {
 
         <div className={
           "k-bs-grid" + addBlockClass(props) + " grid-align-"+props.attributes.valign +
-          ( props.attributes.halign ? " has-centered-block-edit" : "" ) +
+          ( props.attributes.halign ? " has-"+props.attributes.halign : "" ) +
           ( props.attributes.noGutters ? " k-bs-grid-no-gutters" : "" )
         }>
           <InnerBlocks
@@ -140,12 +140,20 @@ registerBlockType( 'k-blocks-bs-grid-child/k-blocks', {
 	supports: { html: false, className: false },
 	attributes: {
     className: { type: 'string', default: '' },
+    /* breakpoints */
     colBreakpoint: { type: 'number', default: 0 },
     colSmBreakpoint: { type: 'number', default: 0 },
     colSmBreakpoint: { type: 'number', default: 0 },
     colMdBreakpoint: { type: 'number', default: 6 },
     colLgBreakpoint: { type: 'number', default: 0 },
     colXlBreakpoint: { type: 'number', default: 0 },
+    /* colors */
+    bgColor: { type: 'string', default: 'transparent', },
+    bgGradient: { type: 'string', default: false, },
+    bgImage: { type: 'string' },
+    bgImageId: { type: 'integer', default: 0 },
+    bgImageType: { type: 'string', default: 'cover', },
+    bgImageFocal: { type: 'object', default: { x: '0.5', y: '0.5' } },
 	},
 
 /*-----------------------------------------------------------------------------*/
@@ -159,6 +167,7 @@ registerBlockType( 'k-blocks-bs-grid-child/k-blocks', {
   			select( 'core/block-editor' ).getBlocks( props.clientId ).length > 0,
   		[ props.clientId ]
   	);
+    const atts = props.attributes;
 
 		return (
       <Fragment>
@@ -166,13 +175,30 @@ registerBlockType( 'k-blocks-bs-grid-child/k-blocks', {
         {/* BLOCK CONTROLS IMPORT */}
         <ControlsChild propsObject={props} />
 
-        <InnerBlocks
-          renderAppender={
-            hasInnerBlocks
-              ? undefined
-              : () => <InnerBlocks.ButtonBlockAppender />
-          }
+        <div
+          style={ {
+            color: atts.color,
+            backgroundColor: atts.bgColor,
+            backgroundImage:
+            ( atts.bgGradient ? atts.bgGradient : 'none' ) + ',' +
+            ( atts.bgImage ? ( "url('"+atts.bgImage+"')" ) : 'none' ),
+            backgroundSize: ( (atts.bgImageType=='cover') ? 'auto, cover' : ( (atts.bgImageType=='cover') ? 'auto, contain' : 'auto, auto' ) ),
+            backgroundRepeat: ( (atts.bgImageType!='repeat') ? 'no-repeat,no-repeat' : 'no-repeat,repeat' ),
+            backgroundPosition: ( (atts.bgImageType!='repeat') ? ( 'center,'+(atts.bgImageFocal.x*100)+'% '+(atts.bgImageFocal.y*100)+'%' ) : 'center,center' ),
+            position: 'absolute',
+            top: '0', left: '0', right: '0', bottom: '0'
+          } }
         />
+
+        <span style={ {color: atts.color} }>
+          <InnerBlocks
+            renderAppender={
+              hasInnerBlocks
+                ? undefined
+                : () => <InnerBlocks.ButtonBlockAppender />
+            }
+          />
+        </span>
 
       </Fragment>
 		);
@@ -184,9 +210,23 @@ registerBlockType( 'k-blocks-bs-grid-child/k-blocks', {
 
 	save(props) {
 
+        const atts = props.attributes;
+
         return (
           <Fragment>
-            <div className={ "k-bs-grid-col" + addBlockClass(props) + bsGetColClasses(props)  }>
+            <div
+              className={ "k-bs-grid-col position-relative" + addBlockClass(props) + bsGetColClasses(props)  }
+              style={ {
+                color: atts.color,
+                backgroundColor: atts.bgColor,
+                backgroundImage:
+                ( atts.bgGradient ? atts.bgGradient : 'none' ) + ',' +
+                ( atts.bgImage ? ( "url('"+atts.bgImage+"')" ) : 'none' ),
+                backgroundSize: ( (atts.bgImageType=='cover') ? 'auto, cover' : ( (atts.bgImageType=='cover') ? 'auto, contain' : 'auto, auto' ) ),
+                backgroundRepeat: ( (atts.bgImageType!='repeat') ? 'no-repeat,no-repeat' : 'no-repeat,repeat' ),
+                backgroundPosition: ( (atts.bgImageType!='repeat') ? ( 'center,'+(atts.bgImageFocal.x*100)+'% '+(atts.bgImageFocal.y*100)+'%' ) : 'center,center' ),
+              } }
+            >
               <InnerBlocks.Content />
             </div>
           </Fragment>
@@ -202,12 +242,10 @@ registerBlockType( 'k-blocks-bs-grid-child/k-blocks', {
 
 const withCustomClassName = wp.compose.createHigherOrderComponent( ( BlockListBlock ) => {
   return ( props ) => {
-  if ( props.name !== 'k-blocks-bs-grid-child/k-blocks' ) {
-    return <BlockListBlock { ...props } />
-  }
-  return (
-    <BlockListBlock { ...props } className={ "mx-0 k-bs-grid-admin-col" + bsGetColClasses(props) + addBlockClass(props) } />);
+    if ( props.name !== 'k-blocks-bs-grid-child/k-blocks' ) return (<BlockListBlock { ...props } />);
+    const atts = props.attributes;
+    return (<BlockListBlock { ...props } className={ "mx-0 k-bs-grid-admin-col" + bsGetColClasses(props) + addBlockClass(props) }/>);
   };
 }, 'withClientIdClassName' );
 
-wp.hooks.addFilter( 'editor.BlockListBlock', 'example/filter-blocks', withCustomClassName );
+wp.hooks.addFilter( 'editor.BlockListBlock', 'column/filter-blocks', withCustomClassName );

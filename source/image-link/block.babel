@@ -3,8 +3,8 @@
 const { __ } = wp.i18n;
 const { registerBlockType } = wp.blocks;
 const { InnerBlocks, MediaReplaceFlow, BlockVerticalAlignmentToolbar, BlockControls, InspectorControls, AlignmentToolbar, URLPopover, URLInput } = wp.blockEditor;
-const { RichText, Button, ToolbarGroup, Toolbar, ToolbarButton, Panel, PanelBody, PanelRow, Popover } = wp.components;
-const { useState } = wp.element;
+const { RichText, Button, ToolbarGroup, Toolbar, ToolbarButton, ToggleControl, Panel, PanelBody, PanelRow, Popover } = wp.components;
+const { useState, Fragment } = wp.element;
 
 import { LinkToolbar } from '../common/LinkToolbar.js';
 import { bootstrapValignClasses } from '../common/common-functions.js';
@@ -20,8 +20,10 @@ const BlockIcon = () => (
 /*              Fluid image Link Block               */
 /*===================================================*/
 
+const ConditionalWrapper = ({ condition, wrapper, children }) => condition ? wrapper(children) : children;
+
 registerBlockType( 'k-blocks-img-link/k-blocks', {
-	title: __( 'Fluid image Link' ),
+	title: __( 'Image Fluid' ),
 	icon: BlockIcon,
 	category: 'k-common-blocks',
 	supports: {
@@ -30,100 +32,154 @@ registerBlockType( 'k-blocks-img-link/k-blocks', {
 	    }
 	},
 	attributes: {
-		supports: {
-		    color: { // This also enables text and background UI controls.
-		        gradient: true // Enable gradients UI control.
-		    }
-		},
-		image: {
-			type: 'string',
-			default: '',
-		},
-		valign: {
-			type: 'string',
-			default: 'center',
-		},
-		className: {
-			type: 'string',
-		},
-		url: {
-			type: 'string',
-			default: '#',
-		},
-		opensInNewTab: {
-			type: 'boolean',
-			default: false,
-		},
+		image: { type: 'string', default: '', },
+		valign: { 	type: 'string', default: 'bottom', },
+		className: { type: 'string', default: '', },
+		url: { type: 'string', default: '#', },
+		opensInNewTab: { type: 'boolean', default: false, },
+		hasLink: { type: 'boolean', default: false, },
+		hasOverlay: { type: 'boolean', default: false, },
+		isW100: { type: 'boolean', default: false, },
 	},
 
 	edit(props) {
 
+		const pr = props.attributes;
+
 		return (
 
-		<div
-			className={ "k-blocks-img-link position-relative "+props.attributes.className }
-			style={ {
-				minHeight: ( props.attributes.image=="" ? '15rem' : 'unset' ),
-				backgroundColor: ( props.attributes.image=="" ? '#f0f0f0' : 'transparent' )
-			} }
-		>
+			<Fragment>
 
-			<BlockControls>
-				<LinkToolbar
-					value={ { url: props.attributes.url, opensInNewTab: props.attributes.opensInNewTab } }
-					onChange={ ( nextValue ) => {
-						if ( nextValue.url != undefined ) props.setAttributes( { url : nextValue.url} );
-						if ( nextValue.opensInNewTab != undefined ) props.setAttributes( { opensInNewTab: nextValue.opensInNewTab} );
-					} }
-				/>
-				<BlockVerticalAlignmentToolbar
-					onChange={ ( newcontent ) => { props.setAttributes( { valign: newcontent } ); } }
-					value={ props.attributes.valign }
-				/>
-				<MediaReplaceFlow
-					mediaURL={ props.attributes.image }
-					allowedTypes={ [ 'image' ] }
-					accept="image/*"
-					name={ __( "Background" ) }
-					onSelect={ ( newcontent ) => {props.setAttributes( { image: newcontent.url } ); } }
-				/>
-			</BlockControls>
+				<BlockControls>
+					{ pr.hasLink &&
+						<LinkToolbar
+							value={ { url: pr.url, opensInNewTab: pr.opensInNewTab } }
+							onChange={ ( nextValue ) => {
+								if ( nextValue.url != undefined ) props.setAttributes( { url : nextValue.url} );
+								if ( nextValue.opensInNewTab != undefined ) props.setAttributes( { opensInNewTab: nextValue.opensInNewTab} );
+							} }
+						/>
+					}
+					{ pr.hasOverlay &&
+						<BlockVerticalAlignmentToolbar
+							onChange={ ( newcontent ) => { props.setAttributes( { valign: newcontent } ); } }
+							value={ pr.valign }
+						/>
+					}
+					<MediaReplaceFlow
+						mediaURL={ pr.image }
+						allowedTypes={ [ 'image' ] }
+						accept="image/*"
+						name={ __( "Image" ) }
+						onSelect={ ( newcontent ) => {props.setAttributes( { image: newcontent.url } ); } }
+					/>
+				</BlockControls>
 
-			<img class="k-blocks-img-link-img w-100" src={ props.attributes.image } />
-			<div
-				className={'k-blocks-img-link-text-wrapper position-absolute d-flex '+bootstrapValignClasses(props.attributes.valign) }
-				style={ {top: '0', left: '0', right: '0', bottom: '0' } }
-			>
-				<div className="k-blocks-img-link-inner-content px-lg-3 py-4 has-text-align-center">
-					<InnerBlocks allowedBlocks={ [ 'core/paragraph', 'core/heading' ] } />
-				</div>
-			</div>
+				<InspectorControls>
+					<PanelBody title={__('General')} >
+						<ToggleControl
+							label="Image Link"
+							checked={ pr.hasLink }
+							onChange={ () => props.setAttributes({hasLink:!pr.hasLink}) }
+						/>
+						<ToggleControl
+							label="Has Caption Overlay"
+							checked={ pr.hasOverlay }
+							onChange={ () => props.setAttributes({hasOverlay:!pr.hasOverlay}) }
+						/>
+						{ !pr.hasOverlay &&
+							<ToggleControl
+								label="Width 100%"
+								checked={ pr.isW100 }
+								onChange={ () => props.setAttributes({isW100:!pr.isW100}) }
+							/>
+						}
+					</PanelBody>
+				</InspectorControls>
 
-		</div>
+				<ConditionalWrapper
+					condition = {(pr.hasOverlay || pr.image=="" )}
+					wrapper = {
+						(children) =>
+						<figure
+							className={ "k-blocks-img-link position-relative d-inline-block"+pr.className }
+							style={ {
+								minHeight: ( pr.image=="" ? '10rem' : 'unset' ),
+								minWidth: ( pr.image=="" ? '10rem' : 'unset' ),
+								backgroundColor: ( pr.image=="" ? '#f0f0f0' : 'transparent' ),
+								marginBottom: '0'
+							} }
+						>
+							{children}
+						</figure>
+					}
+				>
 
+					<img class={"k-blocks-img"+((pr.isW100 || pr.hasOverlay)?" w-100":" img-fluid")+(pr.hasOverlay?"":" "+(pr.className?pr.className:''))} src={ pr.image } />
+
+					{ pr.hasOverlay &&
+						<figcaption
+							className={'k-blocks-img-link-text-wrapper position-absolute '+bootstrapValignClasses(pr.valign) }
+							style={ {top: '0', left: '0', right: '0', bottom: '0' } }
+						>
+							<div className="k-blocks-img-caption-inner-content has-text-align-center">
+								<InnerBlocks
+									//allowedBlocks={ [ 'core/paragraph', 'core/heading' ] }
+								/>
+							</div>
+						</figcaption>
+					}
+				</ConditionalWrapper>
+			</Fragment>
 		);
 	},
 
 
 	save(props) {
 
+		const pr = props.attributes;
+
 		return (
 
-		<div className={ "k-big-hero-block position-relative "+props.attributes.className } >
-			<a href={props.attributes.url} target={ props.attributes.opensInNewTab ? "_blank" : false } rel="noopener noreferrer">
-				<img class="k-blocks-img-link-img w-100" src={ props.attributes.image } />
-				<div
-					className={'k-blocks-img-link-text-wrapper position-absolute d-flex '+bootstrapValignClasses(props.attributes.valign) }
-					style={ {top: '0', left: '0', right: '0', bottom: '0' } }
-				>
-					<div className="k-blocks-img-link-inner-content px-lg-3 py-4 has-text-align-center">
-						<InnerBlocks.Content/>
-					</div>
-				</div>
-			</a>
-		</div>
+		<ConditionalWrapper
+			condition = {pr.hasOverlay}
+			wrapper = {(children) => <figure className={"k-big-hero-block position-relative d-inline-block "+pr.className} >{children}</figure>}
+		>
+			<ConditionalWrapper
+				condition = {pr.hasLink}
+				wrapper = {(children) => <a href={pr.url} target={pr.opensInNewTab?"_blank":false} rel="noopener noreferrer">{children}</a>}
+			>
+				<img class={"k-blocks-img"+((pr.isW100 || pr.hasOverlay)?" w-100":" img-fluid")+(pr.hasOverlay?"":" "+pr.className)} src={pr.image} />
+				{ pr.hasOverlay &&
+					<figcaption
+						className={'k-blocks-img-link-text-wrapper position-absolute '+bootstrapValignClasses(pr.valign) }
+						style={ {top: '0', left: '0', right: '0', bottom: '0' } }
+					>
+						<div className="k-blocks-img-caption-inner-content has-text-align-center">
+							<InnerBlocks.Content/>
+						</div>
+					</figcaption>
+				}
+			</ConditionalWrapper>
+		</ConditionalWrapper>
 
 		);
 
 	},
 } );
+
+
+
+/*=============================================================================*/
+/*                ADD CLASS TO NESTED BLOCK WRAPPER WITH FILTER                */
+/*=============================================================================*/
+
+const withCustomClassName = wp.compose.createHigherOrderComponent( ( BlockListBlock ) => {
+  return ( props ) => {
+	  if ( props.name !== 'k-blocks-img-link/k-blocks' ) return <BlockListBlock { ...props } />;
+		if ( !(props.attributes.isW100) ) return <BlockListBlock { ...props } className={ "d-inline-block" } />;
+	  else return <BlockListBlock { ...props } />;
+	};
+}, 'withClientIdClassName' );
+
+wp.hooks.addFilter( 'editor.BlockListBlock', 'image-block/filter-blocks', withCustomClassName );

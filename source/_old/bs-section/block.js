@@ -51,7 +51,7 @@ registerBlockType('k-blocks-bs-section/k-blocks', {
   parent: ['core/post-content'], // only root block
   supports: { align: ['full'], anchor: true, html: false },
   attributes: {
-    align: { type: 'string' },
+    align: { type: 'string', default: 'full' },
     valign: { type: 'string', default: 'center' },
     color: { type: 'string', default: 'inherit' },
     bgColor: { type: 'string', default: 'transparent' },
@@ -60,11 +60,10 @@ registerBlockType('k-blocks-bs-section/k-blocks', {
     bgImageId: { type: 'integer', default: 0 },
     bgImageType: { type: 'string', default: 'cover' },
     bgImageFocal: { type: 'object', default: { x: '0.5', y: '0.5' } },
-    className: { type: 'string', default: '' },
+    className: { type: 'string' },
     anchor: { type: 'string' },
     isSectionWide: { type: 'boolean', default: false },
-    sectionMinHeight: { type: 'integer', default: 0 },
-    minHeight: { type: 'integer', default: 0 }
+    sectionMinHeight: { type: 'integer', default: 0 }
   },
 
   /*=============================================================================*/
@@ -95,7 +94,7 @@ registerBlockType('k-blocks-bs-section/k-blocks', {
       wp.element.createElement(
         'div',
         {
-          className: "k-bs-section-block " + (!atts.isSectionWide ? "" : "container-fluid clearfix ") + atts.className,
+          className: "k-bs-section-block " + atts.className,
           style: {
             color: atts.color,
             backgroundColor: atts.bgColor,
@@ -103,40 +102,34 @@ registerBlockType('k-blocks-bs-section/k-blocks', {
             backgroundSize: atts.bgImageType == 'cover' ? 'auto, cover' : atts.bgImageType == 'cover' ? 'auto, contain' : 'auto, auto',
             backgroundRepeat: atts.bgImageType != 'repeat' ? 'no-repeat,no-repeat' : 'no-repeat,repeat',
             backgroundPosition: atts.bgImageType != 'repeat' ? 'center,' + atts.bgImageFocal.x * 100 + '% ' + atts.bgImageFocal.y * 100 + '%' : 'center,center',
-            display: atts.minHeight ? 'flex' : 'block',
-            flexDirection: atts.minHeight ? 'column' : 'unset',
-            justifyContent: atts.minHeight ? 'center' : 'unset',
-            minHeight: atts.minHeight ? atts.minHeight + 'Rem' : 'unset'
+            paddingLeft: atts.isSectionWide ? "16px" : "0",
+            paddingRight: atts.isSectionWide ? "16px" : "0"
           }
         },
+        wp.element.createElement(ResizableBox, {
+          className: 'k-bs-section-block_resizer' + (isResizing ? ' is-resizing' : ''),
+          enable: { top: false, right: false, bottom: true, left: false, topRight: false, bottomRight: false, bottomLeft: false, topLeft: false },
+          onResize: function onResize(_event, _direction, elt) {
+            setTempHeight(elt.clientHeight);
+            props.setAttributes({ sectionMinHeight: elt.clientHeight });
+            if (!isResizing) setIsResizing(true);
+          },
+          onResizeStop: function onResizeStop(_event, _direction, elt) {
+            setTempHeight(elt.parentNode.clientHeight);
+            setIsResizing(false);
+          },
+          size: { height: tempHeight },
+          minHeight: '0'
+        }),
         wp.element.createElement(
-          ConditionalWrapper,
+          'div',
           {
-            condition: atts.minHeight,
-            wrapper: function wrapper(children) {
-              return wp.element.createElement(
-                'div',
-                { className: 'k-bs-section-block-inner-content' },
-                ' ',
-                children,
-                ' '
-              );
-            }
+            className: "k-bs-section-block-content-wrapper " + (atts.isSectionWide ? "container-fluid " : "container ") + (0, _commonFunctions.bootstrapValignClasses)(atts.valign),
+            style: { minHeight: atts.sectionMinHeight }
           },
           wp.element.createElement(
-            ConditionalWrapper,
-            {
-              condition: !atts.isSectionWide,
-              wrapper: function wrapper(children) {
-                return wp.element.createElement(
-                  'div',
-                  { className: "k-bs-section-block-container container clearfix" },
-                  ' ',
-                  children,
-                  ' '
-                );
-              }
-            },
+            'div',
+            { className: 'k-bs-section-block-inner-content' },
             wp.element.createElement(InnerBlocks, {
               renderAppender: hasInnerBlocks ? undefined : function () {
                 return wp.element.createElement(InnerBlocks.ButtonBlockAppender, null);
@@ -158,7 +151,7 @@ registerBlockType('k-blocks-bs-section/k-blocks', {
     return wp.element.createElement(
       'div',
       {
-        className: "k-bs-section-block " + (!atts.isSectionWide ? "" : "container-fluid clearfix ") + atts.className,
+        className: 'k-bs-section-block',
         style: {
           color: atts.color,
           backgroundColor: atts.bgColor,
@@ -166,40 +159,19 @@ registerBlockType('k-blocks-bs-section/k-blocks', {
           backgroundSize: atts.bgImageType == 'cover' ? 'auto, cover' : atts.bgImageType == 'cover' ? 'auto, contain' : 'auto, auto',
           backgroundRepeat: atts.bgImageType != 'repeat' ? 'no-repeat,no-repeat' : 'no-repeat,repeat',
           backgroundPosition: atts.bgImageType != 'repeat' ? 'center,' + atts.bgImageFocal.x * 100 + '% ' + atts.bgImageFocal.y * 100 + '%' : 'center,center',
-          display: atts.minHeight ? 'flex' : 'block',
-          flexDirection: atts.minHeight ? 'column' : 'unset',
-          justifyContent: atts.minHeight ? 'center' : 'unset',
-          minHeight: atts.minHeight ? atts.minHeight + 'Rem' : 'unset'
+          paddingLeft: atts.isSectionWide ? "16px" : "0",
+          paddingRight: atts.isSectionWide ? "16px" : "0"
         }
       },
       wp.element.createElement(
-        ConditionalWrapper,
+        'div',
         {
-          condition: atts.minHeight,
-          wrapper: function wrapper(children) {
-            return wp.element.createElement(
-              'div',
-              { className: 'k-bs-section-block-inner-content' },
-              ' ',
-              children,
-              ' '
-            );
-          }
+          className: "k-bs-section-block-content-wrapper " + (atts.isSectionWide ? "" : "container ") + (0, _commonFunctions.bootstrapValignClasses)(atts.valign),
+          style: { minHeight: atts.sectionMinHeight }
         },
         wp.element.createElement(
-          ConditionalWrapper,
-          {
-            condition: !atts.isSectionWide,
-            wrapper: function wrapper(children) {
-              return wp.element.createElement(
-                'div',
-                { className: "k-bs-section-block-container container clearfix" },
-                ' ',
-                children,
-                ' '
-              );
-            }
-          },
+          'div',
+          { className: 'k-bs-section-block-inner-content' },
           wp.element.createElement(InnerBlocks.Content, null)
         )
       )

@@ -7,6 +7,7 @@ export function ControlsChild(args) {
   /* definitions */
 
   const props = args.propsObject;
+  const atts = props.attributes;
 
   const { __ } = wp.i18n;
   const { MediaUpload, MediaUploadCheck, MediaPlaceholder, MediaReplaceFlow } = wp.blockEditor;
@@ -64,6 +65,27 @@ export function ControlsChild(args) {
             <BsBreakPoint attributeName="colXlBreakpoint" label="XL" />
           </div>
         </PanelBody>
+        <PannelUltimateBgControl
+          // first toolbar: color block
+          colorValue={ atts.color }
+          onColorChange={ ( newVal ) => props.setAttributes({ color: newVal }) }
+          bgColorValue={ atts.bgColor }
+          onBgColorChange={ ( newVal ) => props.setAttributes({ bgColor: newVal }) }
+          // second toolbar: image block
+          bgImgUrlValue={ atts.bgImage }
+          bgImgIdValue={ atts.bgImageId }
+          onBgImgSelect={ ( newVal ) => props.setAttributes({ bgImage: newVal.url, bgImageId: newVal.id }) }
+          onSetDefaultClick={ () => props.setAttributes({ bgImage: "none", bgImageId: 0 }) }
+          // bg focal for second toolbar: optional
+          bgFocalValue={ atts.bgImageFocal }
+          onBgImageFocalChange={ ( newVal ) => props.setAttributes({ bgImageFocal: newVal }) }
+          // bg style for second toolbar: optional
+          bgStyleValue={ atts.bgImageType }
+          onBgStyleChange={ ( newVal ) => props.setAttributes({ bgImageType: newVal }) }
+          // third toolbar: gradient overlay block
+          gradientOvelayValue={ atts.bgGradient }
+          onGradientOverlayChange={ ( newVal ) => props.setAttributes({ bgGradient: newVal }) }
+        />
       </InspectorControls>
 
     </Fragment>

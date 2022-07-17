@@ -11,7 +11,7 @@ export function Controls(args) {
   const { __ } = wp.i18n;
   const { MediaUpload, MediaUploadCheck, MediaPlaceholder, MediaReplaceFlow } = wp.blockEditor;
   const { BlockVerticalAlignmentToolbar, BlockControls, InspectorControls, AlignmentToolbar } = wp.blockEditor;
-  const { Button, ToolbarGroup, Toolbar, ToolbarButton, Dashicon, SVG, Path, PanelBody, PanelRow, SelectControl } = wp.components;
+  const { Button, ToolbarGroup, Toolbar, ToolbarButton, Dashicon, SVG, Path, PanelBody, PanelRow, SelectControl, RangeControl } = wp.components;
   const { useState, useEffect, Fragment } = wp.element;
 
   const WideBlockButtonThird = () => (
@@ -83,6 +83,16 @@ export function Controls(args) {
       =======================================================================*/}
 
       <InspectorControls>
+        <PanelBody title={__('Options')} >
+          <RangeControl
+            value={ props.attributes.minHeight }
+            onChange={ ( newvalue ) => props.setAttributes( { minHeight: newvalue } ) }
+            min={ 0 }
+            max={ 50 }
+            label={ __('Outer image minimum height'+' (Rem)') }
+            type="Rem"
+          />
+        </PanelBody>
         <PannelUltimateBgControl
           // first toolbar: color block
           colorValue={ props.attributes.color }

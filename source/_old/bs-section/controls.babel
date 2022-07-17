@@ -12,7 +12,7 @@ export function Controls(args) {
   const { __ } = wp.i18n;
   const { MediaUpload, MediaUploadCheck, MediaPlaceholder, MediaReplaceFlow } = wp.blockEditor;
   const { BlockVerticalAlignmentToolbar, BlockControls, InspectorControls, AlignmentToolbar } = wp.blockEditor;
-  const { Button, ToolbarGroup, Toolbar, ToolbarButton, Dashicon, SVG, Path, PanelBody, PanelRow, SelectControl, RangeControl } = wp.components;
+  const { Button, ToolbarGroup, Toolbar, ToolbarButton, Dashicon, SVG, Path, PanelBody, PanelRow, SelectControl } = wp.components;
   const { useState, useEffect, Fragment } = wp.element;
 
   const SectionBlockButtonWide = () => (
@@ -37,25 +37,13 @@ export function Controls(args) {
           onClick = { () => { props.setAttributes( { isSectionWide: !att.isSectionWide } ) } }
           isActive = { att.isSectionWide }
         />
-        { false &&
-          <BlockVerticalAlignmentToolbar
-            onChange={ ( newcontent ) => { props.setAttributes( { valign: newcontent } ); } }
-            value={ att.valign }
-          />
-        }
+        <BlockVerticalAlignmentToolbar
+          onChange={ ( newcontent ) => { props.setAttributes( { valign: newcontent } ); } }
+          value={ att.valign }
+        />
       </BlockControls>
 
       <InspectorControls>
-        <PanelBody title={__('Options')} >
-          <RangeControl
-            value={ att.minHeight }
-            onChange={ ( newvalue ) => props.setAttributes( { minHeight: newvalue } ) }
-            min={ 0 }
-            max={ 50 }
-            label={ __('Section body min height'+' (Rem)') }
-            type="Rem"
-          />
-        </PanelBody>
         <PannelUltimateBgControl
           // first toolbar: color block
           colorValue={ att.color }

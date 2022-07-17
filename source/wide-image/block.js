@@ -56,7 +56,8 @@ registerBlockType('k-blocks-text-wide/k-blocks', {
     bgImageId: { type: 'integer', default: 0 },
     bgImageType: { type: 'string', default: 'cover' },
     className: { type: 'string' },
-    anchor: { type: 'string' }
+    anchor: { type: 'string' },
+    minHeight: { type: 'integer', default: 25 }
   },
 
   /*=============================================================================*/
@@ -95,7 +96,7 @@ registerBlockType('k-blocks-text-wide/k-blocks', {
       });
     });
 
-    var editStyle = { backgroundImage: props.attributes.image, position: 'relative' };
+    var editStyle = { backgroundImage: props.attributes.image, position: 'relative', minHeight: props.attributes.minHeight + 'Rem' };
     if (props.attributes.reverse == false) {
       editStyle.marginLeft = calculateMarginValue();
     } else {
@@ -131,13 +132,14 @@ registerBlockType('k-blocks-text-wide/k-blocks', {
             backgroundSize: props.attributes.bgImageType == 'cover' ? 'auto, cover' : props.attributes.bgImageType == 'contain' ? 'auto, contain' : 'auto, auto',
             backgroundRepeat: props.attributes.bgImageType != 'repeat' ? 'no-repeat,no-repeat' : 'no-repeat,repeat',
             backgroundPosition: props.attributes.bgImageType != 'repeat' ? 'center, center' : 'center,center',
-            paddingLeft: props.attributes.isSectionWide ? "16px" : "0",
-            paddingRight: props.attributes.isSectionWide ? "16px" : "0"
+            overflow: 'hidden'
+            //paddingLeft: ( props.attributes.isSectionWide ? "16px" : "0" ),
+            //paddingRight: ( props.attributes.isSectionWide ? "16px" : "0" ),
           }
         },
         wp.element.createElement(
           'div',
-          { 'class': 'k-wide-block-container k-editor-container m-auto' },
+          { 'class': 'k-wide-block-container container m-auto' },
           wp.element.createElement(
             'div',
             { className: 'k-wide-block-row no-gutters row px-lg-0' + (props.attributes.reverse ? ' flex-row-reverse' : '') },
@@ -192,7 +194,8 @@ registerBlockType('k-blocks-text-wide/k-blocks', {
     var offcetFront = '0';
     var bgImgStylesObj = {
       backgroundImage: props.attributes.image,
-      position: 'relative'
+      position: 'relative',
+      minHeight: props.attributes.minHeight + 'Rem'
     };
     if (props.attributes.align != 'full') {
       bgImgStylesObj['marginLeft'] = '0';
@@ -222,7 +225,7 @@ registerBlockType('k-blocks-text-wide/k-blocks', {
         { className: 'k-wide-block-container container' },
         wp.element.createElement(
           'div',
-          { className: 'k-wide-block-row row px-lg-0' + (props.attributes.reverse ? ' flex-row-reverse' : '') },
+          { className: 'k-wide-block-row row no-gutters px-lg-0' + (props.attributes.reverse ? ' flex-row-reverse' : '') },
           wp.element.createElement(
             'div',
             { className: 'k-wide-block-col-bgimg ' + (props.attributes.third ? 'col-lg-4' : 'col-lg-6') + ' px-lg-0 ' + (0, _commonFunctions.bootstrapValignClasses)(props.attributes.valign) },
@@ -254,3 +257,4 @@ registerBlockType('k-blocks-text-wide/k-blocks', {
     );
   }
 });
+//# sourceMappingURL=block.js.map

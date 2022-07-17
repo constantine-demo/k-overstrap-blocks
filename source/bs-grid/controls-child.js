@@ -14,6 +14,7 @@ function ControlsChild(args) {
   /* definitions */
 
   var props = args.propsObject;
+  var atts = props.attributes;
 
   var __ = wp.i18n.__;
   var _wp$blockEditor = wp.blockEditor,
@@ -102,7 +103,43 @@ function ControlsChild(args) {
           wp.element.createElement(BsBreakPoint, { attributeName: 'colLgBreakpoint', label: 'LG' }),
           wp.element.createElement(BsBreakPoint, { attributeName: 'colXlBreakpoint', label: 'XL' })
         )
-      )
+      ),
+      wp.element.createElement(_PannelUltimateBgControl.PannelUltimateBgControl
+      // first toolbar: color block
+      , { colorValue: atts.color,
+        onColorChange: function onColorChange(newVal) {
+          return props.setAttributes({ color: newVal });
+        },
+        bgColorValue: atts.bgColor,
+        onBgColorChange: function onBgColorChange(newVal) {
+          return props.setAttributes({ bgColor: newVal });
+        }
+        // second toolbar: image block
+        , bgImgUrlValue: atts.bgImage,
+        bgImgIdValue: atts.bgImageId,
+        onBgImgSelect: function onBgImgSelect(newVal) {
+          return props.setAttributes({ bgImage: newVal.url, bgImageId: newVal.id });
+        },
+        onSetDefaultClick: function onSetDefaultClick() {
+          return props.setAttributes({ bgImage: "none", bgImageId: 0 });
+        }
+        // bg focal for second toolbar: optional
+        , bgFocalValue: atts.bgImageFocal,
+        onBgImageFocalChange: function onBgImageFocalChange(newVal) {
+          return props.setAttributes({ bgImageFocal: newVal });
+        }
+        // bg style for second toolbar: optional
+        , bgStyleValue: atts.bgImageType,
+        onBgStyleChange: function onBgStyleChange(newVal) {
+          return props.setAttributes({ bgImageType: newVal });
+        }
+        // third toolbar: gradient overlay block
+        , gradientOvelayValue: atts.bgGradient,
+        onGradientOverlayChange: function onGradientOverlayChange(newVal) {
+          return props.setAttributes({ bgGradient: newVal });
+        }
+      })
     )
   );
 }
+//# sourceMappingURL=controls-child.js.map

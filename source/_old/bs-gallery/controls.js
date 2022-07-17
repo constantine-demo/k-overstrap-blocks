@@ -3,16 +3,15 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.ControlsSetChild = ControlsSetChild;
+exports.Controls = Controls;
 
 var _PannelUltimateBgControl = require('../common/PannelUltimateBgControl.js');
 
-function ControlsSetChild(args) {
+function Controls(args) {
 
   /* definitions */
 
   var props = args.propsObject;
-  var att = args.propsObject.attributes;
 
   var __ = wp.i18n.__;
   var _wp$blockEditor = wp.blockEditor,
@@ -35,37 +34,37 @@ function ControlsSetChild(args) {
       Path = _wp$components.Path,
       PanelBody = _wp$components.PanelBody,
       PanelRow = _wp$components.PanelRow,
-      SelectControl = _wp$components.SelectControl,
-      IconButton = _wp$components.IconButton,
-      DropdownMenu = _wp$components.DropdownMenu,
-      MenuGroup = _wp$components.MenuGroup,
-      MenuItem = _wp$components.MenuItem,
-      MenuItemsChoice = _wp$components.MenuItemsChoice;
+      SelectControl = _wp$components.SelectControl;
   var _wp$element = wp.element,
       useState = _wp$element.useState,
       useEffect = _wp$element.useEffect,
       Fragment = _wp$element.Fragment;
-  var useSelect = wp.data.useSelect;
 
+  /* output */
 
   return wp.element.createElement(
     Fragment,
     null,
-    wp.element.createElement(BlockControls, null),
     wp.element.createElement(
-      InspectorControls,
+      BlockControls,
       null,
-      wp.element.createElement(_PannelUltimateBgControl.PannelUltimateBgControl
-      // first toolbar: color block
-      , { colorValue: att.color,
-        onColorChange: function onColorChange(newVal) {
-          return props.setAttributes({ color: newVal });
+      wp.element.createElement(BlockVerticalAlignmentToolbar, {
+        onChange: function onChange(newcontent) {
+          props.setAttributes({ valign: newcontent });
         },
-        bgColorValue: att.bgColor,
-        onBgColorChange: function onBgColorChange(newVal) {
-          return props.setAttributes({ bgColor: newVal });
-        }
-      })
-    )
+        value: props.attributes.valign
+      }),
+      wp.element.createElement(
+        Toolbar,
+        { label: 'Edit vjlt' },
+        wp.element.createElement(ToolbarButton, {
+          icon: 'edit',
+          label: __("Edit block mode"),
+          onClick: args.setIsEditMode,
+          isActive: args.isEditMode
+        })
+      )
+    ),
+    wp.element.createElement(InspectorControls, null)
   );
 } /** @jsx wp.element.createElement */
