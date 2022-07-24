@@ -27,14 +27,26 @@ function compiled_common_gutenberg_block_enqueue_scripts(){
 
 // Register styles for blocks for frontend
 add_action(  'enqueue_block_assets', function(){
-	//wp_enqueue_style( 'styles-block', plugin_dir_url( __FILE__ ) . 'css/k-common-block-styles.css');
+	// add slick slider
+	wp_enqueue_script( 'slick-slider', plugin_dir_url( __FILE__ ) . 'slick/slick.min.js', array('jquery'), null, true  );
+	wp_enqueue_style( 'slick-style', plugin_dir_url( __FILE__ ) . 'slick/slick.css' );
+	// add ecco script
+	wp_enqueue_script( 'ekko-lightbox', plugin_dir_url( __FILE__ ) . 'ekko/ekko-lightbox.min.js', array('jquery'), null, true  );
+	wp_enqueue_style( 'ekko-lightbox-style', plugin_dir_url( __FILE__ ) . 'ekko/ekko-lightbox.css' );
+	// main block style
+	wp_enqueue_style( 'styles-block', plugin_dir_url( __FILE__ ) . 'css/k-common-block-styles.css');
 });
 
 //Register styles/sripts for blocks backend
 add_action('enqueue_block_editor_assets', function(){
+	// add slick slider
+	wp_enqueue_script( 'slick-slider', plugin_dir_url( __FILE__ ) . 'slick/slick.min.js', array('jquery'), null, true  );
+	wp_enqueue_style( 'slick-style', plugin_dir_url( __FILE__ ). 'slick/slick.css' );
+	// main block style and admin block style
 	wp_enqueue_style( 'styles-block-admin', plugin_dir_url( __FILE__ ) . 'css/k-common-block-styles-admin.css');
 	wp_enqueue_script( 'admin-bock-scripts', plugin_dir_url( __FILE__ ) . 'admin-scripts.js' );
 });
+
 
 //Register block category
 add_filter( 'block_categories', 'k_common_blocks_block_category_registration', 10, 2);

@@ -1,0 +1,247 @@
+/* ---------------------------- */
+/* --------definitions--------- */
+/* ---------------------------- */
+.rb-img-cover,
+.k-img-cover {
+	background-size: cover;
+	background-position: center;
+	background-color: #f3f4f5;
+}
+.k-overflow-hidden {
+	overflow: hidden;
+}
+.k-grid-wrapper {
+		max-width: 66.4989378333em;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: content-box;
+}
+
+/* ---------------------------- */
+/* ----simple grid system------ */
+/* ---------------------------- */
+@media (min-width: 768px) {
+	.grid-row, .grid-row-1of2,
+	.grid-row-1of3, .grid-row-1of4 {
+    display: flex;
+		box-sizing: border-box;
+  }
+}
+.grid-col {
+	flex: 1;
+}
+.grid-row-1of2 > .grid-col {
+	flex: 0 0 50%;
+	max-width: 50%;
+	width: 100%;
+}
+.grid-row-1of3 > .grid-col {
+	flex: 0 0 33.3333%;
+	max-width: 33.3333%;
+}
+.grid-row-1of4 > .grid-col {
+	flex: 0 0 25%;
+	max-width: 25%;
+}
+
+/* ----------------------------------- */
+/* -       wide wrapper block -        */
+/* ----------------------------------- */
+.k-BgrSectWrapper-wide-block {
+	background-color: #eeeeee;
+	padding: 2rem 1rem;
+}
+
+/* -------------------------------- */
+/* - wide header left/right style - */
+/* -------------------------------- */
+.k-WideHeaderLeft-wide-wrapper,
+.k-WideHeaderRight-wide-wrapper {
+	overflow-x: hidden;
+}
+.k-WideHeaderRight-header {
+	text-align: right;
+}
+.k-WideHeaderLeft-header {
+	text-align: left;
+}
+.k-WideHeaderLeft-inner,
+.k-WideHeaderRight-inner {
+	display: inline-block;
+	position: relative;
+	z-index: 0;
+}
+.k-WideHeaderLeft-inner:before,
+.k-WideHeaderRight-inner:before {
+	position: absolute;
+	z-index: -1;
+	content: " ";
+	background-color: #eeeeee;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+}
+@media (min-width: 768px) {
+	.k-WideHeaderRight-inner:before {
+		right: -100vw;
+	}
+	.k-WideHeaderLeft-inner:before {
+		left: -100vw;
+	}
+}
+
+/* ------------------------------ */
+/* - img wide block right style - */
+/* ------------------------------ */
+.k-WideImageSection-img-height {
+	min-height: 20rem;
+}
+.k-WideImageToLeftSection-col-text-wrapper {
+	padding: 2rem 0 calc( 2rem - 1.41575em ) 1rem;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+.k-WideImageToRightSection-col-text-wrapper {
+	padding: 2rem 1rem calc( 2rem - 1.41575em ) 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+.k-WideImageToLeftSection-col-img-wrapper,
+.k-WideImageToRightSection-col-img-wrapper {
+	position: relative;
+}
+.k-WideImageToLeftSection-col-img,
+.k-WideImageToRightSection-col-img {
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+}
+@media (min-width: 768px) {
+	.k-WideImageToLeftSection-col-img {
+		left: calc( 100% - 50vw );
+	}
+	.k-WideImageToRightSection-col-img {
+		right: calc( 100% - 50vw );
+	}
+}
+.block-editor-block-list__block .k-WideImageToLeftSection-col-img>.k-MediaAreaUpload,
+.block-editor-block-list__block .k-WideImageToRightSection-col-img>.k-MediaAreaUpload {
+	position: absolute;
+	margin: 7px;
+	top: 50%; left: 50%;
+	transform: translate(-50%,-50%);
+}
+.block-editor-block-list__block .k-WideImageToLeftSection-wrapper {
+	/*padding-right: 14px;*/
+}
+.block-editor-block-list__block .k-WideImageToRightSection-wrapper {
+  /*padding-left: 14px;*/
+}
+
+/* ------------------------------------ */
+/*  regular img block right/left style  */
+/* ------------------------------------ */
+.k-ImageHalfRightSection-img-height,
+.k-ImageHalfLeftSection-img-height{
+	min-height: 20rem;
+}
+
+/* ------------------------------------ */
+/*      hero text regular block         */
+/* ------------------------------------ */
+.k-HeroImageTextBlock-grid-wrapper {
+	display: flex;
+	justify-content: flex-end;
+	position: relative;
+}
+.k-HeroImageTextBlock-button {
+	position: absolute;
+	left: 0; right: 0;
+}
+.k-HeroImageTextBlock-col-custom {
+	flex: 0 0 50%;
+}
+@media (max-width: 767px) {
+	.k-HeroImageTextBlock-col-custom {
+		flex: 0 0 100%
+	}
+}
+.k-HeroImageTextBlock-content {
+	background-color: rgba(255, 255, 255, 0.8);
+	padding: 2rem 1rem;
+	margin: 1rem 10%;
+	min-height: 30rem;
+}
+/*---------------------------------*/
+/*    Icons Set Block Horizontal   */
+/*---------------------------------*/
+/* block editor styles */
+@media (min-width: 768px) {
+	.block-editor-block-list__block .k-iconHorizontal-content {
+    display: block; /* disable front  flexbox */
+		margin: 0; /* disable negative margin front */
+  }
+	.block-editor-block-list__block .k-iconHorizontal-content .k-sectionInnerIcon-item  {
+		padding: 0; /* disable padding front */
+	}
+	.k-iconHorizontal-content .block-editor-block-list__layout{
+    display: flex;
+		flex-wrap: wrap;
+  }
+	.k-iconHorizontal-content .block-editor-block-list__layout .wp-block,
+	.k-iconHorizontal-content .block-editor-block-list__layout .block-list-appender {
+		flex: 0 0 calc( 50% - 30px );
+	}
+	.k-iconHorizontal-content .block-editor-block-list__layout .wp-block,
+	.k-iconHorizontal-content .block-editor-block-list__layout .block-list-appender {
+		margin: 15px;
+	}
+	.k-iconHorizontal-content .block-editor-block-list__layout .block-list-appender .block-editor-button-block-appender {
+		height: 100%;
+	}
+}
+/* icons wrapper style */
+.k-iconHorizontal-content {
+	/* disable padding left/right items */
+	margin-right: -0.5rem;
+	margin-left: -0.5rem;
+}
+@media (min-width: 768px) {
+	.k-iconHorizontal-content {
+    display: flex;
+		flex-wrap: wrap;
+  }
+	.k-iconHorizontal-content .k-sectionInnerIcon-item {
+		flex: 0 0 50%;
+	}
+}
+
+/* icon itself style */
+.k-iconHorizontal-content .k-sectionInnerIcon-item {
+	display: flex;
+	padding: 0.5rem;
+}
+.k-iconHorizontal-content .k-sectionInnerIcon-item .k-sectionInnerIcon-imgPlaceholderWrapper {
+	background-color: rgba(237, 239, 240, 0.8);
+	width: 150px;
+	height: 150px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+.k-iconHorizontal-content .k-sectionInnerIcon-item .k-sectionInnerIcon-imgPlaceholderWrapper,
+.k-iconHorizontal-content .k-sectionInnerIcon-item .k-sectionInnerIcon-imgWrapper {
+	max-width: 150px;
+	flex-grow: 0;
+	flex-shrink: 0;
+}
+.k-iconHorizontal-content .k-sectionInnerIcon-item .k-sectionInnerIcon-description {
+	flex-grow: 1;
+	padding-left: 1rem;
+}

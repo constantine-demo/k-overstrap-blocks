@@ -148,6 +148,7 @@ registerBlockType( 'k-blocks-bs-grid-child/k-blocks', {
     colLgBreakpoint: { type: 'number', default: 0 },
     colXlBreakpoint: { type: 'number', default: 0 },
     /* colors */
+    color: { type: 'string', default: 'initial', },
     bgColor: { type: 'string', default: 'transparent', },
     bgGradient: { type: 'string', default: false, },
     bgImage: { type: 'string' },
@@ -176,17 +177,16 @@ registerBlockType( 'k-blocks-bs-grid-child/k-blocks', {
         <ControlsChild propsObject={props} />
 
         <div
+          class="k-bs-grid-admin-color-wrapper"
           style={ {
             color: atts.color,
             backgroundColor: atts.bgColor,
-            backgroundImage:
-            ( atts.bgGradient ? atts.bgGradient : 'none' ) + ',' +
-            ( atts.bgImage ? ( "url('"+atts.bgImage+"')" ) : 'none' ),
+            backgroundImage: ( atts.bgGradient ? atts.bgGradient : 'none' ) + ',' + ( atts.bgImage ? ( "url('"+atts.bgImage+"')" ) : 'none' ),
             backgroundSize: ( (atts.bgImageType=='cover') ? 'auto, cover' : ( (atts.bgImageType=='cover') ? 'auto, contain' : 'auto, auto' ) ),
             backgroundRepeat: ( (atts.bgImageType!='repeat') ? 'no-repeat,no-repeat' : 'no-repeat,repeat' ),
             backgroundPosition: ( (atts.bgImageType!='repeat') ? ( 'center,'+(atts.bgImageFocal.x*100)+'% '+(atts.bgImageFocal.y*100)+'%' ) : 'center,center' ),
             position: 'absolute',
-            top: '0', left: '0', right: '0', bottom: '0'
+            top: '0', left: '0', right: '0', bottom: '0', zIndex: '0'
           } }
         />
 
@@ -244,7 +244,7 @@ const withCustomClassName = wp.compose.createHigherOrderComponent( ( BlockListBl
   return ( props ) => {
     if ( props.name !== 'k-blocks-bs-grid-child/k-blocks' ) return (<BlockListBlock { ...props } />);
     const atts = props.attributes;
-    return (<BlockListBlock { ...props } className={ "mx-0 k-bs-grid-admin-col" + bsGetColClasses(props) + addBlockClass(props) }/>);
+    return (<BlockListBlock { ...props } className={ "k-bs-grid-admin-col" + bsGetColClasses(props) + addBlockClass(props) }/>);
   };
 }, 'withClientIdClassName' );
 
